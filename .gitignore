@@ -1,0 +1,15 @@
+# Compiled files
+*.o
+*.obj
+*.exe
+
+# CMake build directory
+/cmake-build-debug-visual-studio/
+/cmake-build-release-visual-studio/
+
+# CLion files
+.idea/
+*.iml
+
+# Logs and temporary files
+*.log
