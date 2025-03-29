@@ -14,6 +14,11 @@ else()
     message(WARNING "You are not using MSVC! This project is optimized for MSVC.")
 endif()
 
+if (MSVC)
+    add_compile_options(/I"${CMAKE_BINARY_DIR}/_deps/googlebenchmark-src/include")
+endif()
+
 add_subdirectory(src)
 add_subdirectory(tests)
 add_subdirectory(example)
+add_subdirectory(benchmarks)

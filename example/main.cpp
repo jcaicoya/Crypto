@@ -1,59 +1,73 @@
-#include "BigInt.h"
+#include "BigUint.h"
 #include <iostream>
 
 int main() {
-    {
-        BigInt a("123456789123456789");
-        BigInt b("987654321987654321");
+    BigUint a;
+    std::cout << "Initially a is: " << a.toString() << '\n';
 
-        BigInt c = a + b; // Test addition
-        std::cout << a << " + " << b << " = " << c << std::endl;
+    constexpr int32_t times = BigUint::BASE - 1;
+    for (int32_t ii=0; ii<times; ii++) {
+        a.plusOne();
     }
+    std::cout << "a.plusOne() " << BigUint::BASE -1  << " times is: " << a.toString() << '\n';;
+    a.plusOne();
+    std::cout << "a.plusOne() one more time is: " << a.toString() << '\n';;
+    a.minusOne();
+    std::cout << "a.minusOne() is: " << a.toString() << '\n';;
 
-    {
-        BigInt a("12345");
-        BigInt b = -a;
+    //std::cout << "In base 10 is: " << a.toBase10String() << std::endl;
+    
+    /*
+    { 
+        BigUint a(1000);
+        const BigUint b(250);
 
-        std::cout << "a: " << a << std::endl; // Outputs: a: 12345
-        std::cout << "b: " << b << std::endl; // Outputs: b: -12345
-
-        BigInt c = BigInt(0);
-        std::cout << "c: " << -c << std::endl; // Outputs: c: 0
-    }
-
-    {
-        BigInt a("-12345");
-        BigInt b = a.abs();
-
-        std::cout << "a: " << a << std::endl;  // Outputs: a: -12345
-        std::cout << "b: " << b << std::endl;  // Outputs: b: 12345
-
-        BigInt c("67890");
-        BigInt d = c.abs();
-
-        std::cout << "c: " << c << std::endl;  // Outputs: c: 67890
-        std::cout << "d: " << d << std::endl;  // Outputs: d: 67890
-    }
-
-    {
-        BigInt a("1000");
-        BigInt b("250");
+        std::cout << a << "a = " << a << '\n';
+        std::cout << b << "b = " << b << '\n';
 
         a += b;
-        std::cout << "a += b: " << a << std::endl; // Outputs: 1250
+        std::cout << "a += b: " << a << '\n'; // Outputs: 1250
 
         a -= b;
-        std::cout << "a -= b: " << a << std::endl; // Outputs: 1000
+        std::cout << "a -= b: " << a << '\n'; // Outputs: 1000
 
         a *= b;
-        std::cout << "a *= b: " << a << std::endl; // Outputs: 250000
+        std::cout << "a *= b: " << a << '\n'; // Outputs: 250000
 
         a /= b;
-        std::cout << "a /= b: " << a << std::endl; // Outputs: 1000
+        std::cout << "a /= b: " << a << '\n'; // Outputs: 1000
 
-        a %= BigInt("300");
-        std::cout << "a %= 300: " << a << std::endl; // Outputs: 100
+        a %= BigUint(300);
+        std::cout << "a %= 300: " << a << '\n'; // Outputs: 100
     }
+    */
+
+    /*
+    {
+        const BigUint base(5);
+        const BigUint exponent(3);
+        const BigUint mod(13);
+
+        std::cout << "5^3 % 13: " << base.modPow(exponent, mod) << '\n';  // Outputs: 8 (5^3 % 13 = 125 % 13 = 8)
+    }
+    */
+
+    /*
+    {
+        const BigUint a("123456789123456789");
+        const BigUint b("987654321987654321");
+        std::cout << a << "a = " << a << '\n';
+        std::cout << b << "b = " << b << '\n';
+        std::cout << a << " + " << b << " = " << a + b << '\n';
+        std::cout << a << " - " << b << " = " << a - b << '\n';
+        std::cout << b << " - " << a << " = " << b - a << '\n';
+        std::cout << a << " * " << b << " = " << a * b << '\n';
+        std::cout << a << " / " << b << " = " << a / b << '\n';
+        std::cout << b << " / " << a << " = " << b / a << '\n';
+        std::cout << a << " % " << b << " = " << a % b << '\n';
+        std::cout << b << " % " << a << " = " << b % a << '\n';
+    }
+        */
 
     return 0;
 }
