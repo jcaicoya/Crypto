@@ -8,12 +8,66 @@ public:
     }
 };
 
-TEST(BigUintTest, default_constructor_creates_zero) {
-    BigUint a;
-    const auto &digits = BigUintTestAccessor::get_digits(a);
-    EXPECT_EQ(digits.size(), 1);
-    EXPECT_EQ(digits.front(), 0);
+//---------- Construction test begin-----------//
+
+TEST(BigUintTest, default_constructor_creates_biguint_zero) {
+    const BigUint defaultBigUint;
+    EXPECT_EQ(defaultBigUint, BigUint::ZERO);
 }
+
+TEST(BigUintTest, construction_from_digit_type) {
+    constexpr auto digitZero = static_cast<BigUint::DigitType>(0);
+    const BigUint fromDigitZero(digitZero);
+    EXPECT_EQ(fromDigitZero, BigUint::ZERO);
+
+    constexpr auto digitOne = static_cast<BigUint::DigitType>(1);
+    const BigUint fromDigitOne(digitOne);
+    EXPECT_EQ(fromDigitOne, BigUint::ONE);
+
+    constexpr auto baseMinusOne = BigUint::BASE - 1;
+    const BigUint fromBaseMinusOne(baseMinusOne);
+    const auto fromBaseMinusOneDigits = BigUintTestAccessor::get_digits(fromBaseMinusOne);
+    EXPECT_EQ(fromBaseMinusOneDigits.size(), 1);
+    EXPECT_EQ(fromBaseMinusOneDigits.front(), 65'535);
+}
+
+TEST(BigUintTest, construction_from_string_and_digit_vector) {
+    const BigUint fromEmptyString("");
+    EXPECT_EQ(fromEmptyString, BigUint::ZERO);
+    const BigUint fromEmptyVector{std::vector<BigUint::DigitType>()};
+    EXPECT_EQ(fromEmptyVector, BigUint::ZERO);
+
+    const BigUint fromStringWithZero("0");
+    EXPECT_EQ(fromStringWithZero, BigUint::ZERO);
+    const BigUint fromVectorWithZero{std::vector<BigUint::DigitType>(1, static_cast<BigUint::DigitType>(0))};
+    EXPECT_EQ(fromVectorWithZero, BigUint::ZERO);
+
+    const BigUint fromStringWithOne("1");
+    EXPECT_EQ(fromStringWithOne, BigUint::ONE);
+    const BigUint fromVectorWithOne{std::vector<BigUint::DigitType>(1, static_cast<BigUint::DigitType>(1))};
+    EXPECT_EQ(fromVectorWithOne, BigUint::ONE);
+
+    const BigUint fromStringWithBaseMinusOne("65535");
+    const auto fromStringWithBaseMinusOneDigits = BigUintTestAccessor::get_digits(fromStringWithBaseMinusOne);
+    EXPECT_EQ(fromStringWithBaseMinusOneDigits.size(), 1);
+    EXPECT_EQ(fromStringWithBaseMinusOneDigits.front(), 65'535);
+
+    const BigUint fromVectorWithBaseMinusOne{std::vector<BigUint::DigitType>(1, static_cast<BigUint::DigitType>(65'535))};
+    const auto fromVectorWithBaseMinusOneDigits = BigUintTestAccessor::get_digits(fromVectorWithBaseMinusOne);
+    EXPECT_EQ(fromVectorWithBaseMinusOneDigits.size(), 1);
+    EXPECT_EQ(fromVectorWithBaseMinusOneDigits.front(), 65'535);
+
+    const BigUint fromStringWithSeventyThousand("1|4464"); // Decimal: 70'000
+    const auto fromStringWithSeventyThousandDigits = BigUintTestAccessor::get_digits(fromStringWithSeventyThousand);
+    EXPECT_EQ(fromStringWithSeventyThousandDigits.size(), 2);
+    EXPECT_EQ(fromStringWithSeventyThousandDigits.front(), 4'464);
+    EXPECT_EQ(fromStringWithSeventyThousandDigits.back(), 1);
+    constexpr BigUint::WideDigitType asDecimal = 1 * BigUint::BASE + 4'464;
+    EXPECT_EQ(asDecimal, static_cast<BigUint::WideDigitType>(70'000));
+}
+
+//---------- Construction tests end -----------//
+
 
 TEST(BigUintTest, shift_zero_left_five_positions) {
     BigUint a = BigUint::ZERO;
@@ -65,16 +119,19 @@ TEST(BigUintTest, minus_one) {
     EXPECT_EQ(a.toString(), "0");
 }
 
-TEST(BigUintTest, string_constructions) {
-    BigUint a("");
-    EXPECT_EQ(a, BigUint::ZERO);
+TEST(BigUintTest, add_digit_zero) {
+    const BigUint a("1|0");
+    constexpr auto digitZero = static_cast<BigUint::DigitType>(0);
+    const auto aPlus0 = a.add(digitZero);
+    EXPECT_EQ(aPlus0, a);
+}
 
-    BigUint b("65535");
-    EXPECT_EQ(b.toString(), "65535");
-
-    BigUint c("1|0");
-    b.mePlusOne();
-    EXPECT_EQ(b, c);
+TEST(BigUintTest, add_digit_one) {
+    const BigUint a("1|0");
+    constexpr auto digitOne = static_cast<BigUint::DigitType>(1);
+    const auto aPlus1 = a.add(digitOne);
+    const BigUint expectedResult("1|1");
+    EXPECT_EQ(aPlus1, expectedResult);
 }
 
 TEST(BigUintTest, multiply_by_digit_zero) {

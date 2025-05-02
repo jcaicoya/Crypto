@@ -7,13 +7,23 @@ int main() {
 
     constexpr int32_t times = BigUint::BASE - 1;
     for (int32_t ii=0; ii<times; ii++) {
-        a.plusOne();
+        a.mePlusOne();
     }
-    std::cout << "a.plusOne() " << BigUint::BASE -1  << " times is: " << a.toString() << '\n';;
-    a.plusOne();
-    std::cout << "a.plusOne() one more time is: " << a.toString() << '\n';;
-    a.minusOne();
-    std::cout << "a.minusOne() is: " << a.toString() << '\n';;
+    std::cout << "a.mePlusOne() " << times  << " times is: " << a.toString() << '\n';
+    a.mePlusOne();
+    std::cout << "a.mePlusOne() is: " << a.toString() << '\n';
+    a.mePlusOne();
+    std::cout << "a.mePlusOne() is: " << a.toString() << "\n\n";
+
+    a.meMinusOne();
+    std::cout << "a.meMinusOne() is: " << a.toString() << '\n';
+    a.meMinusOne();
+    std::cout << "a.meMinusOne() is: " << a.toString() << '\n';
+    for (int32_t ii=0; ii<times; ii++) {
+        a.meMinusOne();
+    }
+    std::cout << "a.meMinusOne() " << times  << " times is: " << a.toString() << '\n';
+
 
     //std::cout << "In base 10 is: " << a.toBase10String() << std::endl;
     

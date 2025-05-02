@@ -10,13 +10,15 @@
 class BigUint {
 public:
     using DigitType = uint16_t;
+    using Digit = DigitType;
+    using Digits = std::vector<Digit>;
     using WideDigitType = uint32_t;
     static constexpr WideDigitType BASE = std::numeric_limits<DigitType>::max() + 1;
 
     BigUint();
-    explicit BigUint(DigitType value);
-    explicit BigUint(const std::string& value);
-    explicit BigUint(const std::vector<DigitType> &digits);
+    explicit BigUint(Digit digit);
+    explicit BigUint(const std::string& str);
+    explicit BigUint(const Digits &digits);
 
     BigUint(const BigUint &rhs) = default;
     BigUint & operator=(const BigUint &rhs) = default;
@@ -28,6 +30,11 @@ public:
     static const BigUint ONE;
     static const BigUint TWO;
     static const BigUint TEN;
+
+    void setZero() { *this = BigUint::ZERO; }
+    void setOne() { *this = BigUint::ONE; }
+    void setDigits(const Digits &digits);
+    [[nodiscard]] const Digits & getDigits() const { return digits_; }
 
     [[nodiscard]] std::string toString() const;
     BigUint fromString(const std::string &input);
@@ -47,10 +54,15 @@ public:
     BigUint meMinusOne();
     [[nodiscard]] BigUint minusOne() const;
 
+    BigUint addToMe(DigitType digit);
+    [[nodiscard]] BigUint add(DigitType digit) const;
+    BigUint operator+=(DigitType digit);
+    [[nodiscard]] BigUint operator+(DigitType digit) const;
+
     BigUint addToMe(const BigUint &rhs);
     [[nodiscard]] BigUint add(const BigUint &rhs) const;
     BigUint operator+=(const BigUint &rhs);
-    [[nodiscard]] BigUint operator+(const BigUint &rhs);
+    [[nodiscard]] BigUint operator+(const BigUint &rhs) const;
 
     BigUint subtractToMe(const BigUint &rhs);
     [[nodiscard]] BigUint subtract(const BigUint &rhs) const;
@@ -109,7 +121,7 @@ public:
     friend class BigUintBenchmarkAccessor;
 
 private:
-    std::vector<DigitType> digits_; // Digits stored in reverse order for easier arithmetic
+    Digits digits_; // Digits stored in reverse order for easier arithmetic
 
     void removeLeadingZeros();
     [[nodiscard]] BigUint multiplyNaive(const BigUint& other) const;

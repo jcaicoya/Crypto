@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <complex>
 #include <cmath>
+#include <execution>
 #include <vector>
 #include <numbers>
 #include <ranges>
@@ -26,7 +27,19 @@ BigUint::BigUint(const std::string& str) {
 
 BigUint::BigUint(const std::vector<DigitType> &digits)
     : digits_(digits) {
-    std::reverse(digits_.begin(), digits_.end());
+    if (digits_.empty()) {
+        digits_.push_back(static_cast<DigitType>(0));
+    }
+
+    std::ranges::reverse(digits_.begin(), digits_.end());
+}
+
+void BigUint::setDigits(const Digits &digits) {
+    digits_ = digits;
+    removeLeadingZeros();
+    if (digits_.empty()) {
+        *this = BigUint::ZERO;
+    };
 }
 
 std::string BigUint::toString() const {
@@ -194,12 +207,60 @@ BigUint BigUint::minusOne() const {
     return result.meMinusOne();
 }
 
+BigUint BigUint::addToMe(DigitType digit) {
+    if (digit == 0) {
+        return *this;
+    }
+
+    if (*this == BigUint::ZERO) {
+        digits_[0] = digit;
+        return *this;
+    }
+
+    if (digit == 1) {
+        return mePlusOne();
+    }
+
+    DigitType carry = digit;
+    for (auto &currentDigit : digits_) {
+        WideDigitType partialSum = currentDigit + carry;
+        if (partialSum < BigUint::BASE) {
+            currentDigit =static_cast<DigitType>(partialSum);
+            carry = 0;
+            break;
+        }
+
+        currentDigit = static_cast<DigitType>(partialSum - BigUint::BASE);
+        carry = 1;
+    }
+
+    if (carry) {
+        digits_.push_back(1);
+    }
+
+    return *this;
+}
+
+BigUint BigUint::add(DigitType digit) const {
+    BigUint result = *this;
+    result.addToMe(digit);
+    return result;
+}
+
+BigUint BigUint::operator+=(DigitType digit) {
+    return addToMe(digit);
+}
+
+BigUint BigUint::operator+(DigitType digit) const {
+    return add(digit);
+}
 
 BigUint BigUint::addToMe(const BigUint &rhs) {
     // To avoid this == &rhs case.
     BigUint other = rhs;
 
     if (*this == BigUint::ZERO) {
+        *this = other;
         return other;
     }
 
@@ -210,7 +271,7 @@ BigUint BigUint::addToMe(const BigUint &rhs) {
     std::vector<DigitType> result;
     const auto minSize = std::min(digits_.size(), other.digits_.size());
     DigitType carry = 0;
-    for (std::size_t ii = 0; ii < minSize || carry; ++ii) {
+    for (std::size_t ii = 0; ii < minSize; ++ii) {
         WideDigitType sum = carry;
         sum += digits_[ii];
         sum += other.digits_[ii];
@@ -259,7 +320,6 @@ BigUint BigUint::addToMe(const BigUint &rhs) {
         result.push_back(1);
     }
 
-    std::reverse(result.begin(), result.end());
     digits_ = result;
     return *this;
 }
@@ -273,7 +333,7 @@ BigUint BigUint::operator+=(const BigUint &rhs) {
     return addToMe(rhs);
 }
 
-BigUint BigUint::operator+(const BigUint &rhs) {
+BigUint BigUint::operator+(const BigUint &rhs) const {
     return add(rhs);
 }
 
@@ -445,7 +505,7 @@ BigUint::DigitType BigUint::divideMeByOneDigit(const DigitType divisor) {
         digitPosition--;
     }
 
-    std::vector<DigitType> quotients(numberOfQuotients, 0);
+    std::vector<DigitType> quotients;
     while (digitPosition >= 0) {
         const DigitType &currentDigit = digits_[digitPosition];
         const WideDigitType dividend = carry * BigUint::BASE + currentDigit;
@@ -646,6 +706,13 @@ std::pair<BigUint, BigUint> BigUint::divide(const BigUint &dividend, const BigUi
 
     if (dividend < divisor) {
         return {BigUint::ZERO, dividend};
+    }
+
+    if (divisor.digits_.size() == 1) {
+        const auto digit = divisor.digits_.front();
+        const auto [quotient, remainder] = dividend.divideByOneDigit(digit);
+        const BigUint remainderAsUint(remainder);
+        return {quotient, remainderAsUint};
     }
 
     BigUint quotient, remainder;
