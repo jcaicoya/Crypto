@@ -46,38 +46,38 @@ public:
     std::strong_ordering operator<=>(const BigUint& other) const;
     bool operator==(const BigUint& other) const = default;  // optional if using spaceship
 
-    BigUint shiftMeLeft(size_t shiftPositions);
+    void shiftMeLeft(size_t shiftPositions);
     [[nodiscard]] BigUint shiftLeft(size_t shiftPositions) const;
 
-    BigUint mePlusOne();
+    void mePlusOne();
     [[nodiscard]] BigUint plusOne() const;
 
-    BigUint meMinusOne();
+    void meMinusOne();
     [[nodiscard]] BigUint minusOne() const;
 
-    BigUint addToMe(DigitType digit);
+    void addToMe(DigitType digit);
     [[nodiscard]] BigUint add(DigitType digit) const;
-    BigUint operator+=(DigitType digit);
+    void operator+=(DigitType digit);
     [[nodiscard]] BigUint operator+(DigitType digit) const;
 
-    BigUint addToMe(const BigUint &rhs);
+    void addToMe(const BigUint &rhs);
     [[nodiscard]] BigUint add(const BigUint &rhs) const;
-    BigUint operator+=(const BigUint &rhs);
+    void operator+=(const BigUint &rhs);
     [[nodiscard]] BigUint operator+(const BigUint &rhs) const;
 
-    BigUint subtractToMe(const BigUint &rhs);
+    void subtractToMe(const BigUint &rhs);
     [[nodiscard]] BigUint subtract(const BigUint &rhs) const;
-    BigUint operator-=(const BigUint &rhs);
+    void operator-=(const BigUint &rhs);
     [[nodiscard]] BigUint operator-(const BigUint &rhs) const;
 
-    BigUint multiplyMeByOneDigit(DigitType digit);
+    void multiplyMeByOneDigit(DigitType digit);
     [[nodiscard]] BigUint multiplyByOneDigit(DigitType digit) const;
-    BigUint operator*=(DigitType digit);
+    void operator*=(DigitType digit);
     [[nodiscard]] BigUint operator*(DigitType digit) const;
 
-    BigUint multiplyMeBy(const BigUint &rhs);
+    void multiplyMeBy(const BigUint &rhs);
     [[nodiscard]] BigUint multiplyBy(const BigUint &rhs) const;
-    BigUint operator*=(const BigUint &rhs);
+    void operator*=(const BigUint &rhs);
     [[nodiscard]] BigUint operator*(const BigUint &rhs) const;
 
     // returns the remainder
@@ -128,7 +128,7 @@ private:
 
     // Multiplications
     [[nodiscard]] BigUint multiplyFFT(const BigUint& other) const;
-    [[nodiscard]] std::pair<BigUint, BigUint> split(size_t pos) const;
+    [[nodiscard]] std::pair<BigUint, BigUint> split(std::size_t pos) const;
     [[nodiscard]] BigUint multiplyKaratsuba(const BigUint& other) const;
 };
 
