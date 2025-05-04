@@ -541,7 +541,6 @@ BigUint::DigitType BigUint::operator%(DigitType digit) const {
 
 // returns the remainder
 BigUint BigUint::divideMeBy(const BigUint &rhs) {
-    // &rhs == this is already managed in divide
     const auto [quotient, remainder] = divide(*this, rhs);
     *this = quotient;
     return remainder;
@@ -554,7 +553,6 @@ BigUint BigUint::divideMeBy(const BigUint &rhs) {
 
 // returns the quotient
 BigUint BigUint::operator/=(const BigUint &rhs) {
-    // &rhs == this is already managed in divide
     const auto [quotient, _] = divide(*this, rhs);
     *this = quotient;
     return quotient;
@@ -711,14 +709,14 @@ std::pair<BigUint, BigUint> BigUint::divide(const BigUint &dividend, const BigUi
     BigUint quotient, remainder;
     remainder.digits_.resize(dividend.digits_.size());
 
-    // ✅ Process digits from most to least significant
+    // Process digits from most to least significant
     for (int i = static_cast<int>(dividend.digits_.size()) - 1; i >= 0; --i) {
         remainder.digits_.insert(remainder.digits_.begin(), dividend.digits_[i]);  // Shift remainder
         remainder.removeLeadingZeros();
 
         DigitType q = 0;
         if (remainder >= divisor) {
-            // ✅ Use binary search to find the largest `q` such that `q * divisor <= remainder`
+            // Use binary search to find the largest `q` such that `q * divisor <= remainder`
             WideDigitType low = 0, high = BASE - 1;
             while (low <= high) {
                 const WideDigitType lowPlusHigh = (low + high);
@@ -821,17 +819,14 @@ BigUint BigUint::multiplyFFT(const BigUint& b) const {
 
 std::pair<BigUint, BigUint> BigUint::split(std::size_t pos) const {
     if (pos >= digits_.size()) {
-        return {BigUint(0), *this};  // If split position is too large, return (0, full number)
+        return {BigUint(0), *this};
     }
 
     using diff_t = std::vector<int>::difference_type;
     BigUint low, high;
     low.digits_.assign(digits_.begin(), digits_.begin() + static_cast<diff_t>(pos));
     high.digits_.assign(digits_.begin() + static_cast<diff_t>(pos), digits_.end());
-
-    // Remove leading zeros in the high part
     high.removeLeadingZeros();
-
     return {low, high};
 }
 
@@ -842,10 +837,8 @@ BigUint BigUint::multiplyKaratsuba(const BigUint& other) const {
     }
 
     const size_t middle = digits_.size() / 2;
-
-    // Split numbers into high and low parts
-    auto [low1, high1] = split(middle);
-    auto [low2, high2] = other.split(middle);
+    const auto [low1, high1] = split(middle);
+    const auto [low2, high2] = other.split(middle);
 
     const BigUint z0 = low1.multiplyKaratsuba(low2);
     const BigUint z1 = (low1 + high1).multiplyKaratsuba(low2 + high2);
