@@ -107,7 +107,7 @@ public:
     [[nodiscard]] BigUint operator%(const BigUint &rhs) const;
 
     [[nodiscard]] std::string toBase10String() const;
-    void fromBase10String(const std::string &input);
+    static [[nodiscard]] BigUint fromBase10String(const std::string &input);
 
     /*
     [[nodiscard]] BigUint modAdd(const BigUint& other, const BigUint& mod) const;
@@ -126,11 +126,10 @@ private:
     [[nodiscard]] BigUint multiplyNaive(const BigUint& other) const;
     static std::pair<BigUint, BigUint> divide(const BigUint &dividend, const BigUint &divisor);
 
-    /* Multiplications
+    // Multiplications
     [[nodiscard]] BigUint multiplyFFT(const BigUint& other) const;
     [[nodiscard]] std::pair<BigUint, BigUint> split(size_t pos) const;
     [[nodiscard]] BigUint multiplyKaratsuba(const BigUint& other) const;
-    */
 };
 
 #endif // BigUint_H

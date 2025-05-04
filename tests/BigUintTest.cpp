@@ -6,6 +6,18 @@ public:
     static const std::vector<BigUint::DigitType> & get_digits(const BigUint &bigUint) {
         return bigUint.digits_;
     }
+
+    static [[nodiscard]] BigUint multiplyNaive(const BigUint &lhs, const BigUint& rhs) {
+        return lhs.multiplyNaive(rhs);
+    }
+
+    static [[nodiscard]] BigUint multiplyKaratsuba(const BigUint &lhs, const BigUint& rhs) {
+        return lhs.multiplyKaratsuba(rhs);
+    }
+
+    static [[nodiscard]] BigUint multiplyFFT(const BigUint &lhs, const BigUint& rhs) {
+        return lhs.multiplyFFT(rhs);
+    }
 };
 
 //---------- Construction test begin-----------//
@@ -319,27 +331,31 @@ TEST(BigUintTest, CompoundModulus) {
     EXPECT_EQ(a.toString(), "100");
 }
 
+*/
+
 TEST(BigUintTest, NaiveMultiplication) {
-    BigUint a("123456789");
-    BigUint b("987654321");
-    BigUint result = a.multiplyNaive(b);
-    EXPECT_EQ(result.toString(), "121932631112635269");
+    const BigUint a = BigUint::fromBase10String("123456789");
+    const BigUint b = BigUint::fromBase10String("987654321");
+    const BigUint result = BigUintTestAccessor::multiplyNaive(a, b);
+    const BigUint expected = BigUint::fromBase10String("121932631112635269");
+    EXPECT_EQ(result, expected);
 }
 
 TEST(BigUintTest, KaratsubaMultiplication) {
-    BigUint a("123456789");
-    BigUint b("987654321");
-    BigUint result = a .multiplyFFT(b);
-    EXPECT_EQ(result.toString(), "121932631112635269");
+    const BigUint a = BigUint::fromBase10String("123456789");
+    const BigUint b = BigUint::fromBase10String("987654321");
+    const BigUint result = BigUintTestAccessor::multiplyFFT(a, b);
+    const BigUint expected = BigUint::fromBase10String("121932631112635269");
+    EXPECT_EQ(result, expected);
 }
 
 TEST(BigUintTest, FFTMultiplication) {
-    BigUint a("123456789");
-    BigUint b("987654321");
-    BigUint result = a.multiplyFFT(b);
-    EXPECT_EQ(result.toString(), "121932631112635269");
+    const BigUint a = BigUint::fromBase10String("123456789");
+    const BigUint b = BigUint::fromBase10String("987654321");
+    const BigUint result = BigUintTestAccessor::multiplyFFT(a, b);
+    const BigUint expected = BigUint::fromBase10String("121932631112635269");
+    EXPECT_EQ(result, expected);
 }
-*/
 
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);

@@ -610,14 +610,16 @@ std::string BigUint::toBase10String() const {
     return std::to_string(value.digits_[0]) + result;
 }
 
-void BigUint::fromBase10String(const std::string& str) {
+BigUint BigUint::fromBase10String(const std::string& str) {
     if (str.empty()) throw std::invalid_argument("Empty string is not a valid number.");
 
-    *this = BigUint::ZERO;
+    BigUint result = BigUint::ZERO;
     for (auto d : str) {
         if (!std::isdigit(d)) throw std::invalid_argument("Building BigUint: Invalid character");
-        *this = (*this * BigUint::TEN) + BigUint(static_cast<Digit>(d) - static_cast<Digit>('0'));
+        result = (result.multiplyMeByOneDigit(10)) + BigUint(static_cast<Digit>(d) - static_cast<Digit>('0'));
     }
+
+    return result;
 }
 
 /*
@@ -753,7 +755,6 @@ std::pair<BigUint, BigUint> BigUint::divide(const BigUint &dividend, const BigUi
     return {quotient, remainder};
 }
 
-/*
 using Complex = std::complex<double>;
 const double PI = acos(-1);
 
@@ -860,7 +861,6 @@ BigUint BigUint::multiplyKaratsuba(const BigUint& other) const {
 
     return (z2.shiftLeft(2 * m) + (z1 - z2 - z0).shiftLeft(m) + z0);
 }
-*/
 
 /*
 BigUint BigUint::operator+(const BigUint& other) const {
