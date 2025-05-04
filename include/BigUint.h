@@ -13,6 +13,7 @@ public:
     using Digit = DigitType;
     using Digits = std::vector<Digit>;
     using WideDigitType = uint32_t;
+    using WideDigit = WideDigitType;
     static constexpr WideDigitType BASE = std::numeric_limits<DigitType>::max() + 1;
 
     BigUint();
@@ -105,10 +106,8 @@ public:
     // returns the remainder
     [[nodiscard]] BigUint operator%(const BigUint &rhs) const;
 
-    /*
-     *void fromBase10String(const std::string &input);
     [[nodiscard]] std::string toBase10String() const;
-    */
+    void fromBase10String(const std::string &input);
 
     /*
     [[nodiscard]] BigUint modAdd(const BigUint& other, const BigUint& mod) const;

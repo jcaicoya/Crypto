@@ -517,6 +517,7 @@ BigUint::DigitType BigUint::divideMeByOneDigit(const DigitType divisor) {
     }
 
     digits_ = quotients;
+    std::ranges::reverse(digits_.begin(), digits_.end());
     return static_cast<BigUint::DigitType>(carry);
 }
 
@@ -588,35 +589,36 @@ BigUint BigUint::operator%=(const BigUint &rhs) {
     return remainder;
 }
 
-/*
+std::string BigUint::toBase10String() const {
+    if (*this == ZERO) return "0";
+    if (*this == ONE) return "1";
+    if (*this == TWO) return "2";
+
+    if (digits_.size() == 1) {
+        return std::to_string(digits_[0]);
+    }
+
+    BigUint value = *this;
+    std::string result;
+    while (value.digits_.size() > 1) {
+        const auto [quotient, remainder] = value.divideByOneDigit(10);
+        result.push_back('0' + static_cast<char>(remainder));
+        value = quotient;
+    }
+
+    std::ranges::reverse(result.begin(), result.end());
+    return std::to_string(value.digits_[0]) + result;
+}
+
 void BigUint::fromBase10String(const std::string& str) {
     if (str.empty()) throw std::invalid_argument("Empty string is not a valid number.");
 
     *this = BigUint::ZERO;
     for (auto d : str) {
         if (!std::isdigit(d)) throw std::invalid_argument("Building BigUint: Invalid character");
-        *this = (*this * BigUint::TEN) + BigUint(static_cast<DigitType>(d) - static_cast<DigitType>('0'));
+        *this = (*this * BigUint::TEN) + BigUint(static_cast<Digit>(d) - static_cast<Digit>('0'));
     }
 }
-
-std::string BigUint::toBase10String() const {
-    if (*this == ZERO) return "0";
-    if (*this == ONE) return "1";
-    if (*this == TWO) return "2";
-
-    BigUint value = *this;
-
-    std::string result;
-    while (value > ZERO) {
-        BigUint remainder = value % BigUint::TEN;
-        value /= BigUint::TEN;
-        result.push_back('0' + static_cast<char>(remainder.digits_[0]));
-    }
-
-    std::reverse(result.begin(), result.end());
-    return result;
-}
-*/
 
 /*
 BigUint BigUint::modAdd(const BigUint& other, const BigUint& mod) const {

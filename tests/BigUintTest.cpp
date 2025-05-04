@@ -225,20 +225,30 @@ TEST(BigUintTest, divide_by_three) {
     EXPECT_EQ(remainder, BigUint::ONE);
 }
 
-/*
-TEST(BigUintTest, Addition) {
-    BigUint a(123);
-    BigUint b(456);
-    BigUint c = a + b;
-    EXPECT_EQ(c.toString(), "579");
+TEST(BigUintTest, divide_by_ten) {
+    const BigUint dividend("1|4464"); // Decimal 70'000
+    auto [quotient, remainder] = dividend.divideBy(BigUint(10));
+    EXPECT_EQ(quotient, BigUint{7'000});
+    EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
-TEST(BigUintTest, Subtraction) {
-    BigUint a(1000);
-    BigUint b(1);
-    BigUint c = a - b;
-    EXPECT_EQ(c.toString(), "999");
+TEST(BigUintTest, to_base_10_string) {
+    EXPECT_EQ(BigUint::ZERO.toBase10String(), "0");
+    EXPECT_EQ(BigUint::ONE.toBase10String(), "1");
+    EXPECT_EQ(BigUint::TWO.toBase10String(), "2");
+    EXPECT_EQ(BigUint::TEN.toBase10String(), "10");
+    constexpr BigUint::WideDigit baseWideDigit = BigUint::BASE;
+    constexpr auto baseMinusOneDigit = static_cast<BigUint::Digit>(baseWideDigit - 1);
+    const BigUint baseMinusOne(baseMinusOneDigit);
+    EXPECT_EQ(baseMinusOne.toBase10String(), "65535");
+    const BigUint base = baseMinusOne + 1;
+    EXPECT_EQ(base.toBase10String(), "65536");
+    EXPECT_EQ(BigUint("1|4464").toBase10String(), "70000");
+    EXPECT_EQ(BigUint("1|9232|4352").toBase10String(), "4900000000");
 }
+
+/*
+
 
 TEST(BigUintTest, Multiplication) {
     BigUint a("123456789");
