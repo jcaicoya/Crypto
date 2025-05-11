@@ -494,84 +494,7 @@ void BigUint::squareMe() {
         return result;
     }
 
-    const auto n = digits_.size();
-    std::vector<std::vector<WideDigitType>> matrix(n, std::vector<WideDigitType>(n, static_cast<WideDigit>(0)));
-    for (std::size_t ii = 0; ii < n; ii++) {
-        for (std::size_t jj = ii; jj < n; jj++) {
-            matrix[ii][jj] = static_cast<WideDigit>(digits_[ii] * digits_[jj]);
-        }
-    }
-
-    for (std::size_t jj = 0; jj < n; jj++) {
-        for (std::size_t ii = jj + 1; ii < n; ii++) {
-            matrix[ii][jj] = matrix[jj][ii];
-        }
-    }
-
-    for (std::size_t ii = 0; ii < n; ii++) {
-        WideDigitType carry = 0;
-        for (std::size_t jj = 0; jj < n; jj++) {
-            const auto current = matrix[ii][jj] + carry;
-            if (current >= BigUint::BASE) {
-                carry = current / BigUint::BASE;
-                matrix[ii][jj] = current - carry * BigUint::BASE;
-            }
-            else {
-                matrix[ii][jj] = current;
-                carry = 0;
-            }
-        }
-        if (carry > 0) {
-            matrix[ii].push_back(carry);
-        }
-    }
-
-    for (std::size_t ii = 1; ii < n; ii++) {
-        const auto previousSize = matrix[ii].size();
-        const auto newSize = previousSize + ii;
-        matrix[ii].resize(newSize);
-        for (std::size_t jj = newSize - 1; jj >= ii; jj--) {
-            matrix[ii][jj] = matrix[ii][jj - 1];
-        }
-        for (std::size_t jj = ii; jj > 0; jj--) {
-            matrix[ii][jj - 1] = static_cast<WideDigit>(0);
-        }
-    }
-
-    const std::size_t resultsSize = matrix.back().size() + 1;
-    std::vector<WideDigit> resultWideDigits(resultsSize);
-    for (std::size_t jj = 0; jj < matrix.front().size(); jj++) {
-        resultWideDigits[jj] = matrix.front()[jj];
-    }
-
-    for (std::size_t ii = 1; ii < matrix.size(); ii++) {
-        const auto &currentRow = matrix[ii];
-        WideDigit carry = 0;
-        for (std::size_t jj = 0; jj < currentRow.size(); jj++) {
-            const auto currentDigit = resultWideDigits[jj] + currentRow[jj] + carry;
-            if (currentDigit >= BigUint::BASE) {
-                carry = currentDigit / BigUint::BASE;
-                resultWideDigits[jj] = currentDigit - carry * BigUint::BASE;
-            }
-            else {
-                carry = 0;
-                resultWideDigits[jj] = currentDigit;
-            }
-        }
-        if (carry > 0) {
-            resultWideDigits[currentRow.size()] = carry;
-        }
-    }
-
-    if (resultWideDigits.back() == static_cast<WideDigit>(0)) {
-        resultWideDigits.pop_back();
-    }
-
-    std::vector<DigitType> resultDigits(resultWideDigits.size());
-    for (std::size_t jj = 0; jj < resultDigits.size(); jj++) {
-        resultDigits[jj] = static_cast<DigitType>(resultWideDigits[jj]);
-    }
-
+    const auto resultDigits = optInnerSquare(digits_);
     BigUint result;
     result.digits_ = resultDigits;
     return result;
@@ -996,4 +919,52 @@ BigUint BigUint::multiplyKaratsuba(const BigUint& other) const {
     const BigUint z2 = high1.multiplyKaratsuba(high2);
 
     return (z2.shiftLeft(2 * middle) + (z1 - z2 - z0).shiftLeft(middle) + z0);
+}
+
+[[nodiscard]] std::vector<BigUint::DigitType> BigUint::optInnerSquare(const std::vector<BigUint::DigitType> &digits) {
+    const size_t n = digits.size();
+    std::vector<BigUint::WideDigitType> wideDigits(2 * n, static_cast<BigUint::WideDigit>(0));
+
+    for (size_t ii = 0; ii < n; ii++) {
+        // a_i^2 goes to position 2*i
+        BigUint::WideDigit square = static_cast<BigUint::WideDigit>(digits[ii]) * digits[ii];
+        if (square < BigUint::BASE) {
+            wideDigits[2 * ii] = square;
+        }
+        else {
+            const auto carry = square / BigUint::BASE;
+            wideDigits[2 * ii] = square - carry * BigUint::BASE;
+            wideDigits[2 * ii + 1] = carry;
+        }
+    }
+
+    // Cross terms: 2 * a_i * a_j (i < j)
+    for (size_t ii = 0; ii < n; ii++) {
+        for (size_t jj = ii + 1; jj < n; jj++) {
+            auto product = 2ULL * digits[ii] * digits[jj];
+
+            size_t pos = ii + jj;
+            auto sum = wideDigits[pos] + product;
+            wideDigits[pos] = sum % BigUint::BASE;
+            uint64_t carry = sum / BigUint::BASE;
+
+            // Propagate carry forward if needed
+            while (carry != 0) {
+                pos++;
+                sum = wideDigits[pos] + carry;
+                wideDigits[pos] = sum % BigUint::BASE;
+                carry = sum / BigUint::BASE;
+            }
+        }
+    }
+
+    if (wideDigits.back() == static_cast<BigUint::WideDigit>(0)) {
+        wideDigits.pop_back();
+    }
+
+    std::vector<BigUint::DigitType> resultDigits(wideDigits.size());
+    for (std::size_t jj = 0; jj < resultDigits.size(); jj++) {
+        resultDigits[jj] = static_cast<BigUint::DigitType>(wideDigits[jj]);
+    }
+    return resultDigits;
 }

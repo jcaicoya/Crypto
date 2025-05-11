@@ -133,6 +133,9 @@ private:
     [[nodiscard]] BigUint multiplyFFT(const BigUint& other) const;
     [[nodiscard]] std::pair<BigUint, BigUint> split(std::size_t pos) const;
     [[nodiscard]] BigUint multiplyKaratsuba(const BigUint& other) const;
+
+    // Helpers
+    static [[nodiscard]] std::vector<BigUint::DigitType> optInnerSquare(const std::vector<BigUint::DigitType> &digits);
 };
 
 #endif // BigUint_H
