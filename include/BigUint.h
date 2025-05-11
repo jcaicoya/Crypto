@@ -6,7 +6,6 @@
 #include <iostream>
 #include <cstdint>
 
-
 class BigUint {
 public:
     using DigitType = uint16_t;
@@ -137,5 +136,8 @@ private:
     // Helpers
     static [[nodiscard]] std::vector<BigUint::DigitType> optInnerSquare(const std::vector<BigUint::DigitType> &digits);
 };
+
+std::ostream& operator<<(std::ostream& os, const BigUint& bigUint);
+std::istream& operator>>(std::istream& is, BigUint& bigUint);
 
 #endif // BigUint_H

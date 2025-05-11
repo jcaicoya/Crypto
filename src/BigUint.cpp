@@ -82,18 +82,6 @@ BigUint BigUint::fromString(const std::string &str) {
     return *this;
 }
 
-std::ostream& operator<<(std::ostream& os, const BigUint& bigUint) {
-    os << bigUint.toString();
-    return os;
-}
-
-std::istream& operator>>(std::istream& is, BigUint& bigUint) {
-    std::string value;
-    is >> value;
-    bigUint = BigUint(value);
-    return is;
-}
-
 std::strong_ordering BigUint::operator<=>(const BigUint& other) const {
     if (digits_.size() < other.digits_.size()) return std::strong_ordering::less;
     if (digits_.size() > other.digits_.size()) return std::strong_ordering::greater;
@@ -967,4 +955,18 @@ BigUint BigUint::multiplyKaratsuba(const BigUint& other) const {
         resultDigits[jj] = static_cast<BigUint::DigitType>(wideDigits[jj]);
     }
     return resultDigits;
+}
+
+std::ostream& operator<<(std::ostream& os, const BigUint& bigUint) {
+    return os << bigUint.toBase10String();
+}
+
+std::istream& operator>>(std::istream& is, BigUint& bigUint) {
+    is >> std::ws;
+    std::string number;
+    if (!(is >> number)) {
+        is.setstate(std::ios::failbit);
+    }
+    bigUint = BigUint::fromBase10String(number);
+    return is;
 }
