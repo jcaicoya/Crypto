@@ -201,6 +201,35 @@ TEST(BigUintTest, multiply_by_itself) {
     EXPECT_EQ(square, BigUint("1|9232|4352"));
 }
 
+TEST(BigUintTest, square) {
+    const BigUint zero = BigUint::ZERO;
+    BigUint square = zero.square();
+    EXPECT_EQ(square, BigUint::ZERO);
+
+    const BigUint one = BigUint::ONE;
+    square = one.square();
+    EXPECT_EQ(square, BigUint::ONE);
+
+    BigUint a = BigUint::TWO;
+    BigUint::Digit expectedResult = 2;
+    for (int ii=1; ii<=3; ii++) {
+       a.squareMe();
+       expectedResult *= expectedResult;
+       EXPECT_EQ(a, BigUint(expectedResult));
+    }
+
+    a.squareMe();
+    EXPECT_EQ(a, BigUint("1|0"));
+
+    a = BigUint("1|4464");
+    square = a.square();
+    EXPECT_EQ(square, BigUint("1|9232|4352"));
+
+    a = BigUint::fromBase10String("12345");
+    a.squareMe();
+    EXPECT_EQ(a.toBase10String(), "152399025");
+}
+
 TEST(BigUintTest, divide_by_one) {
     const BigUint dividend("1|4464"); // Decimal 70'000
     auto [quotient, remainder] = dividend.divideBy(BigUint::ONE);
@@ -259,23 +288,38 @@ TEST(BigUintTest, to_base_10_string) {
     EXPECT_EQ(BigUint("1|9232|4352").toBase10String(), "4900000000");
 }
 
-/*
-
-
-TEST(BigUintTest, Multiplication) {
-    BigUint a("123456789");
-    BigUint b("987654321");
-    BigUint result = a * b;
-    EXPECT_EQ(result.toString(), "121932631112635269");
-}
-
 TEST(BigUintTest, ModularAddition) {
-    BigUint a(12345);
-    BigUint b("67890");
-    BigUint mod("100000");
-    EXPECT_EQ(a.modAdd(b, mod).toString(), "80235");
+    const BigUint a = BigUint::fromBase10String("12345");
+    const BigUint b = BigUint::fromBase10String("67890");
+    const BigUint mod = BigUint::fromBase10String("100000");
+    const auto result = BigUint::modAdd(a, b, mod);
+    const auto expected = BigUint::fromBase10String("80235");
+    EXPECT_EQ(result, expected);
 }
 
+TEST(BigUintTest, ModularSubtraction) {
+    const BigUint a = BigUint::fromBase10String("123456");
+    const BigUint b = BigUint::fromBase10String("678901");
+    const BigUint mod = BigUint::fromBase10String("100000");
+    const auto bModSubAResult = BigUint::modSub(b, a, mod);
+    auto expected = BigUint::fromBase10String("55445");
+    EXPECT_EQ(bModSubAResult, expected);
+
+    const auto aModSubBResult = BigUint::modSub(a, b, mod);
+    expected = BigUint::fromBase10String("44555");
+    EXPECT_EQ(aModSubBResult, expected);
+}
+
+TEST(BigUintTest, ModularMultiplication) {
+    const BigUint a = BigUint::fromBase10String("12345");
+    const BigUint b = BigUint::fromBase10String("67890");
+    const BigUint mod = BigUint::fromBase10String("10000");
+    const auto result = BigUint::modMul(a, b, mod); // multiplication is 838.102.050
+    const auto expected = BigUint::fromBase10String("2050");
+    EXPECT_EQ(result, expected);
+}
+
+/*
 TEST(BigUintTest, ModularExponentiation) {
     BigUint base(5);
     BigUint exponent(5);
@@ -295,42 +339,6 @@ TEST(BigUintTest, ModularExponentiation) {
     EXPECT_EQ(BigUint(7).modPow(BigUint(0), BigUint(100)).toBase10String(), "1");  // ✅ x^0 % y = 1
     EXPECT_EQ(BigUint(2).modPow(BigUint(10), BigUint(1024)).toBase10String(), "0"); // ✅ x^y % x^y = 0
 }
-
-TEST(BigUintTest, CompoundAddition) {
-    BigUint a(1000);
-    BigUint b(500);
-    a += b;
-    EXPECT_EQ(a.toString(), "1500");
-}
-
-TEST(BigUintTest, CompoundSubtraction) {
-    BigUint a(1000);
-    BigUint b(500);
-    a -= b;
-    EXPECT_EQ(a.toString(), "500");
-}
-
-TEST(BigUintTest, CompoundMultiplication) {
-    BigUint a(1000);
-    BigUint b(10);
-    a *= b;
-    EXPECT_EQ(a.toString(), "10000");
-}
-
-TEST(BigUintTest, CompoundDivision) {
-    BigUint a(1000);
-    BigUint b(10);
-    a /= b;
-    EXPECT_EQ(a.toString(), "100");
-}
-
-TEST(BigUintTest, CompoundModulus) {
-    BigUint a(1000);
-    BigUint b(300);
-    a %= b;
-    EXPECT_EQ(a.toString(), "100");
-}
-
 */
 
 TEST(BigUintTest, NaiveMultiplication) {

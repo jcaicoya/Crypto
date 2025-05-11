@@ -80,6 +80,9 @@ public:
     void operator*=(const BigUint &rhs);
     [[nodiscard]] BigUint operator*(const BigUint &rhs) const;
 
+    void squareMe();
+    [[nodiscard]] BigUint square() const;
+
     // returns the remainder
     BigUint::DigitType divideMeByOneDigit(DigitType digit);
     // returns quotient and remainder
@@ -109,10 +112,10 @@ public:
     [[nodiscard]] std::string toBase10String() const;
     static [[nodiscard]] BigUint fromBase10String(const std::string &input);
 
+    static [[nodiscard]] BigUint modAdd(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
+    static [[nodiscard]] BigUint modSub(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
+    static [[nodiscard]] BigUint modMul(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
     /*
-    [[nodiscard]] BigUint modAdd(const BigUint& other, const BigUint& mod) const;
-    [[nodiscard]] BigUint modSub(const BigUint& other, const BigUint& mod) const;
-    [[nodiscard]] BigUint modMul(const BigUint& other, const BigUint& mod) const;
     [[nodiscard]] BigUint modPow(const BigUint& other, const BigUint& mod) const;
     */
 

@@ -418,7 +418,7 @@ void BigUint::multiplyMeByOneDigit(DigitType digit) {
         if (product >= BASE) {
             WideDigitType aux = product / BASE;
             carry = static_cast<DigitType>(aux);
-            aux = product - aux * BASE;
+            aux = product - carry * BASE;
             calculatedDigit = static_cast<DigitType>(aux);
         }
         else {
@@ -463,6 +463,118 @@ void BigUint::operator*=(const BigUint &rhs) {
 
 BigUint BigUint::operator*(const BigUint &rhs) const {
     return multiplyBy(rhs);
+}
+
+void BigUint::squareMe() {
+    *this = square();
+}
+
+[[nodiscard]] BigUint BigUint::square() const {
+    if (*this == BigUint::ZERO) {
+        return BigUint::ZERO;
+    }
+
+    if (*this == BigUint::ONE) {
+        return BigUint::ONE;
+    }
+
+    if (digits_.size() == 1) {
+        const auto digit = static_cast<WideDigit>(digits_[0]);
+        const auto square = digit * digit;
+        if (square < BigUint::BASE) {
+            return BigUint(static_cast<Digit>(square));
+        }
+
+        const auto quotient = square / BigUint::BASE;
+        const auto remainder = square % BigUint::BASE;
+        BigUint result;
+        result.digits_.resize(2);
+        result.digits_[0] = static_cast<Digit>(remainder);
+        result.digits_[1] = static_cast<Digit>(quotient);
+        return result;
+    }
+
+    const auto n = digits_.size();
+    std::vector<std::vector<WideDigitType>> matrix(n, std::vector<WideDigitType>(n, static_cast<WideDigit>(0)));
+    for (std::size_t ii = 0; ii < n; ii++) {
+        for (std::size_t jj = ii; jj < n; jj++) {
+            matrix[ii][jj] = static_cast<WideDigit>(digits_[ii] * digits_[jj]);
+        }
+    }
+
+    for (std::size_t jj = 0; jj < n; jj++) {
+        for (std::size_t ii = jj + 1; ii < n; ii++) {
+            matrix[ii][jj] = matrix[jj][ii];
+        }
+    }
+
+    for (std::size_t ii = 0; ii < n; ii++) {
+        WideDigitType carry = 0;
+        for (std::size_t jj = 0; jj < n; jj++) {
+            const auto current = matrix[ii][jj] + carry;
+            if (current >= BigUint::BASE) {
+                carry = current / BigUint::BASE;
+                matrix[ii][jj] = current - carry * BigUint::BASE;
+            }
+            else {
+                matrix[ii][jj] = current;
+                carry = 0;
+            }
+        }
+        if (carry > 0) {
+            matrix[ii].push_back(carry);
+        }
+    }
+
+    for (std::size_t ii = 1; ii < n; ii++) {
+        const auto previousSize = matrix[ii].size();
+        const auto newSize = previousSize + ii;
+        matrix[ii].resize(newSize);
+        for (std::size_t jj = newSize - 1; jj >= ii; jj--) {
+            matrix[ii][jj] = matrix[ii][jj - 1];
+        }
+        for (std::size_t jj = ii; jj > 0; jj--) {
+            matrix[ii][jj - 1] = static_cast<WideDigit>(0);
+        }
+    }
+
+    const std::size_t resultsSize = matrix.back().size() + 1;
+    std::vector<WideDigit> resultWideDigits(resultsSize);
+    for (std::size_t jj = 0; jj < matrix.front().size(); jj++) {
+        resultWideDigits[jj] = matrix.front()[jj];
+    }
+
+    for (std::size_t ii = 1; ii < matrix.size(); ii++) {
+        const auto &currentRow = matrix[ii];
+        WideDigit carry = 0;
+        for (std::size_t jj = 0; jj < currentRow.size(); jj++) {
+            const auto currentDigit = resultWideDigits[jj] + currentRow[jj] + carry;
+            if (currentDigit >= BigUint::BASE) {
+                carry = currentDigit / BigUint::BASE;
+                resultWideDigits[jj] = currentDigit - carry * BigUint::BASE;
+            }
+            else {
+                carry = 0;
+                resultWideDigits[jj] = currentDigit;
+            }
+        }
+        if (carry > 0) {
+            resultWideDigits[currentRow.size()] = carry;
+        }
+    }
+
+    if (resultWideDigits.back() == static_cast<WideDigit>(0)) {
+        resultWideDigits.pop_back();
+    }
+
+    std::vector<DigitType> resultDigits(resultWideDigits.size());
+    for (std::size_t jj = 0; jj < resultDigits.size(); jj++) {
+        resultDigits[jj] = static_cast<DigitType>(resultWideDigits[jj]);
+    }
+
+    BigUint result;
+    result.digits_ = resultDigits;
+    return result;
 }
 
 // returns the remainder
@@ -609,22 +721,61 @@ BigUint BigUint::fromBase10String(const std::string& str) {
     return result;
 }
 
+BigUint BigUint::modAdd(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
+    if (mod == BigUint::ZERO) {
+        throw std::runtime_error("modulus value cannot be zero");
+    }
+
+    if (mod == BigUint::ONE) {
+        throw std::runtime_error("modulus value cannot be one");
+    }
+
+    const auto lhsMod = lhs % mod;
+    const auto rhsMod = rhs % mod;
+    auto result = lhsMod + rhsMod;
+    if (result >= mod) {
+        result -= mod;
+    }
+
+    return result;
+}
+
+BigUint BigUint::modSub(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
+    if (mod == BigUint::ZERO) {
+        throw std::runtime_error("modulus value cannot be zero");
+    }
+
+    if (mod == BigUint::ONE) {
+        throw std::runtime_error("modulus value cannot be one");
+    }
+
+    const auto lhsMod = lhs % mod;
+    const auto rhsMod = rhs % mod;
+    if (lhsMod >= rhsMod) {
+        return lhsMod - rhsMod;
+    }
+
+    const auto temp = rhsMod - lhsMod;
+    const auto result = mod - temp;
+    return result;
+}
+
+BigUint BigUint::modMul(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
+    if (mod == BigUint::ZERO) {
+        throw std::runtime_error("modulus value cannot be zero");
+    }
+
+    if (mod == BigUint::ONE) {
+        throw std::runtime_error("modulus value cannot be one");
+    }
+
+    const auto lhsMod = lhs % mod;
+    const auto rhsMod = rhs % mod;
+    const auto result = lhsMod * rhsMod;
+    return result % mod;
+}
+
 /*
-BigUint BigUint::modAdd(const BigUint& other, const BigUint& mod) const {
-    BigUint result = addMe(other) % mod;
-    return result;
-}
-
-BigUint BigUint::modSub(const BigUint& other, const BigUint& mod) const {
-    BigUint result = (*this - other) % mod;
-    return result;
-}
-
-BigUint BigUint::modMul(const BigUint& other, const BigUint& mod) const {
-    BigUint result = (*this * other) % mod;
-    return result;
-}
-
 BigUint BigUint::modPow(const BigUint& exponent, const BigUint& mod) const {
     if (mod == BigUint::ZERO) {
         throw std::invalid_argument("Modulo by zero is not allowed");
