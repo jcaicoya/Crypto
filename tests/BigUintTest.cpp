@@ -230,6 +230,13 @@ TEST(BigUintTest, square) {
     EXPECT_EQ(a.toBase10String(), "152399025");
 }
 
+TEST(BigUintTest, big_square) {
+    auto a = BigUint::fromBase10String("5000000000");
+    a.squareMe();
+    const auto expectedResult = BigUint::fromBase10String("25000000000000000000");
+    EXPECT_EQ(a, expectedResult);
+}
+
 TEST(BigUintTest, divide_by_one) {
     const BigUint dividend("1|4464"); // Decimal 70'000
     auto [quotient, remainder] = dividend.divideBy(BigUint::ONE);
