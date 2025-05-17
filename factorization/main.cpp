@@ -37,9 +37,10 @@ std::size_t count_number_of_lines(const std::filesystem::path &path) {
 using FactorTable = std::vector<std::vector<BigUint>>;
 using PrimeNumbers = std::vector<BigUint>;
 
-void load_factors_from_file(const std::filesystem::path &path, FactorTable &table) {
+[[nodiscard]] FactorTable build_factor_table_from_file(const std::filesystem::path &path) {
+    FactorTable factor_table;
     const auto number_of_lines = count_number_of_lines(path);
-    table.resize(number_of_lines * 2 + 1);
+    factor_table.reserve(number_of_lines * 2 + 1);
 
     std::ifstream fin(path);
     if (!fin) {
@@ -60,8 +61,8 @@ void load_factors_from_file(const std::filesystem::path &path, FactorTable &tabl
 
         std::vector<BigUint> table_line;
         while (!iss.eof()) {
-            BigUint number;
             try {
+                BigUint number;
                 iss >> number;
                 table_line.push_back(number);
             } catch (const std::exception &e) {
@@ -69,25 +70,36 @@ void load_factors_from_file(const std::filesystem::path &path, FactorTable &tabl
             }
         }
 
-        table[table_position] = table_line;
+        factor_table.push_back(table_line);
         table_position++;
     }
+
+    return factor_table;
 }
 
 void summarize_factor_table(const FactorTable &factor_table) {
-    for (const auto &line : factor_table) {
-        if (line.empty()) {
-            return;
+    std::size_t table_line_counter = 0;
+    for (const auto &number_and_factors : factor_table) {
+        if (number_and_factors.empty()) {
+            std::string error_message = "Factor table line ";
+            error_message += std::to_string(table_line_counter);
+            error_message += " is empty";
+            throw std::runtime_error(error_message.c_str());
+        }
+        table_line_counter++;
+
+        if (number_and_factors.size() == 1) {
+            std::cout << number_and_factors.front() << " has not been factorized\n";
         }
 
-        std::cout << line.front();
-        if (line.size() == 1) {
+        std::cout << number_and_factors.front();
+        if (number_and_factors.size() == 2) {
             std::cout << " is prime\n";
         }
         else {
-            std::cout << " = " << line[1];
-            for (std::size_t ii = 1; ii < line.size(); ii++) {
-                std::cout << " * " << line[ii];
+            std::cout << " = " << number_and_factors[1];
+            for (std::size_t ii = 2; ii < number_and_factors.size(); ii++) {
+                std::cout << " * " << number_and_factors[ii];
             }
             std::cout << '\n';
         }
@@ -96,18 +108,17 @@ void summarize_factor_table(const FactorTable &factor_table) {
 
 void load_primes_from_table(const FactorTable &factor_table, PrimeNumbers &prime_numbers) {
     for (auto &table_line: factor_table) {
-        if (table_line.size() == 1) {
+        if (table_line.size() == 2) {
             prime_numbers.push_back(table_line.front());
         }
     }
 }
 
-
 int main() {
     std::filesystem::path path("resources/factorization.txt");
     FactorTable factor_table;
     try {
-        load_factors_from_file(path, factor_table);
+        factor_table = build_factor_table_from_file(path);
     } catch (const std::exception &e) {
         std::cout << e.what() << '\n';
     }

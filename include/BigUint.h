@@ -5,6 +5,7 @@
 #include <vector>
 #include <iostream>
 #include <cstdint>
+#include <optional>
 
 class BigUint {
 public:
@@ -13,10 +14,11 @@ public:
     using Digits = std::vector<Digit>;
     using WideDigitType = uint32_t;
     using WideDigit = WideDigitType;
+    using ByteType = uint8_t;
+    using ByteDigit = ByteType;
     static constexpr WideDigitType BASE = std::numeric_limits<DigitType>::max() + 1;
 
-    BigUint();
-    explicit BigUint(Digit digit);
+    BigUint(WideDigit digit = 0);
     explicit BigUint(const std::string& str);
     explicit BigUint(const Digits &digits);
 
@@ -30,6 +32,13 @@ public:
     static const BigUint ONE;
     static const BigUint TWO;
     static const BigUint TEN;
+
+    [[nodiscard]] std::optional<DigitType> asDigit() const;
+    [[nodiscard]] std::optional<WideDigitType> asWideDigit() const;
+    [[nodiscard]] std::optional<ByteType> asByteDigit() const;
+
+    [[nodiscard]] Digit getLeastSignificantDigit() const { return digits_.front(); }
+    [[nodiscard]] Digit getMostSignificantDigit() const { return digits_.back(); }
 
     void setZero() { *this = BigUint::ZERO; }
     void setOne() { *this = BigUint::ONE; }

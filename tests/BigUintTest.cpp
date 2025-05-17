@@ -20,8 +20,6 @@ public:
     }
 };
 
-//---------- Construction test begin-----------//
-
 TEST(BigUintTest, default_constructor_creates_biguint_zero) {
     const BigUint defaultBigUint;
     EXPECT_EQ(defaultBigUint, BigUint::ZERO);
@@ -41,6 +39,51 @@ TEST(BigUintTest, construction_from_digit_type) {
     const auto fromBaseMinusOneDigits = BigUintTestAccessor::get_digits(fromBaseMinusOne);
     EXPECT_EQ(fromBaseMinusOneDigits.size(), 1);
     EXPECT_EQ(fromBaseMinusOneDigits.front(), 65'535);
+}
+
+TEST(BigUintTest, construction_from_wide_digit_type) {
+    constexpr auto baseMinusOne = BigUint::BASE - 1;
+    const BigUint fromBaseMinusOne(baseMinusOne);
+    const auto fromBaseMinusOneDigits = BigUintTestAccessor::get_digits(fromBaseMinusOne);
+    EXPECT_EQ(fromBaseMinusOneDigits.size(), 1);
+    EXPECT_EQ(fromBaseMinusOneDigits.front(), 65'535);
+
+    constexpr auto base = BigUint::BASE;
+    const BigUint fromBase(base);
+    const auto fromBaseDigits = BigUintTestAccessor::get_digits(fromBase);
+    ASSERT_EQ(fromBaseDigits.size(), 2);
+    EXPECT_EQ(fromBaseDigits.front(), 0);
+    EXPECT_EQ(fromBaseDigits.back(), 1);
+
+    constexpr auto basePlusOne = BigUint::BASE + 1;
+    const BigUint fromBasePlusOne(basePlusOne);
+    const auto fromBasePlusOneDigits = BigUintTestAccessor::get_digits(fromBasePlusOne);
+    ASSERT_EQ(fromBaseDigits.size(), 2);
+    EXPECT_EQ(fromBasePlusOneDigits.front(), 1);
+    EXPECT_EQ(fromBasePlusOneDigits.back(), 1);
+
+    constexpr auto maxWideDigit = static_cast<BigUint::WideDigitType>(4'294'967'295);
+    const BigUint fromMaxWideDigit(maxWideDigit);
+    const auto fromMaxWideDigits = BigUintTestAccessor::get_digits(fromMaxWideDigit);
+    ASSERT_EQ(fromMaxWideDigits.size(), 2);
+    EXPECT_EQ(fromMaxWideDigits.front(), 65'535);
+    EXPECT_EQ(fromMaxWideDigits.back(), 65'535);
+}
+
+TEST(BigUintTest, construction_from_bite_type) {
+    constexpr auto digitZero = static_cast<BigUint::ByteType>(0);
+    const BigUint fromDigitZero(digitZero);
+    EXPECT_EQ(fromDigitZero, BigUint::ZERO);
+
+    constexpr auto digitOne = static_cast<BigUint::ByteType>(1);
+    const BigUint fromDigitOne(digitOne);
+    EXPECT_EQ(fromDigitOne, BigUint::ONE);
+
+    constexpr auto maxByteType = static_cast<BigUint::ByteType>(255);
+    const BigUint fromMaxByteType(maxByteType);
+    const auto fromMaxByteTypeDigits = BigUintTestAccessor::get_digits(fromMaxByteType);
+    EXPECT_EQ(fromMaxByteTypeDigits.size(), 1);
+    EXPECT_EQ(fromMaxByteTypeDigits.front(), 255);
 }
 
 TEST(BigUintTest, construction_from_string_and_digit_vector) {
@@ -78,8 +121,15 @@ TEST(BigUintTest, construction_from_string_and_digit_vector) {
     EXPECT_EQ(asDecimal, static_cast<BigUint::WideDigitType>(70'000));
 }
 
-//---------- Construction tests end -----------//
+TEST(BigUintTest, check_least_significat_digit) {
+    const BigUint value = BigUint::fromBase10String("70000");
+    EXPECT_EQ(value.getLeastSignificantDigit(), static_cast<BigUint::DigitType>(4464));
+}
 
+TEST(BigUintTest, check_most_significat_digit) {
+    const BigUint value = BigUint::fromBase10String("70000");
+    EXPECT_EQ(value.getMostSignificantDigit(), static_cast<BigUint::DigitType>(1));
+}
 
 TEST(BigUintTest, shift_zero_left_five_positions) {
     BigUint a = BigUint::ZERO;

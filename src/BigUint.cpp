@@ -7,19 +7,22 @@
 #include <numbers>
 #include <ranges>
 
-
 const BigUint BigUint::ZERO = BigUint();
 const BigUint BigUint::ONE = BigUint(static_cast<DigitType>(1));
 const BigUint BigUint::TWO = BigUint(static_cast<DigitType>(2));
 const BigUint BigUint::TEN = BigUint(static_cast<DigitType>(10));
 
-BigUint::BigUint()
-    : digits_(1, 0)
-{}
+BigUint::BigUint(WideDigit digit) {
+    if (digit < BigUint::BASE) {
+        digits_.push_back(static_cast<DigitType>(digit));
+        return;
+    }
 
-BigUint::BigUint(DigitType value)
-    : digits_(1, value)
-{}
+    const auto quotient = digit / BigUint::BASE;
+    const auto remainer = digit - quotient * BigUint::BASE;
+    digits_.push_back(static_cast<DigitType>(remainer));
+    digits_.push_back(static_cast<DigitType>(quotient));
+}
 
 BigUint::BigUint(const std::string& str) {
     fromString(str);
@@ -32,6 +35,40 @@ BigUint::BigUint(const std::vector<DigitType> &digits)
     }
 
     std::ranges::reverse(digits_.begin(), digits_.end());
+}
+
+std::optional<BigUint::DigitType> BigUint::asDigit() const {
+    if (digits_.size() == 1) {
+        return digits_[0];
+    }
+
+    return std::nullopt;
+}
+
+std::optional<BigUint::WideDigitType> BigUint::asWideDigit() const {
+    if (digits_.size() == 1) {
+        return static_cast<WideDigitType>(digits_[0]);
+    }
+
+    if (digits_.size() == 2) {
+        const WideDigitType wideDigit = digits_[0] + digits_[1] * BigUint::BASE;
+        return wideDigit;
+    }
+
+    return std::nullopt;
+}
+
+std::optional<BigUint::ByteType> BigUint::asByteDigit() const {
+    if (digits_.size() > 1) {
+        return std::nullopt;
+    }
+
+    const auto digit = digits_[0];
+    if (digit >= 256) {
+        return std::nullopt;
+    }
+
+    return static_cast<ByteType>(digit);
 }
 
 void BigUint::setDigits(const Digits &digits) {
