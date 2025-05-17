@@ -146,12 +146,12 @@ TEST(BigUintTest, shift_one_left_zero_positions) {
 TEST(BigUintTest, shift_one_left_five_positions) {
     BigUint a = BigUint::ONE;
     a.shift_me_left(5);
-    const BigUint expectedResult("1|0|0|0|0|0");
-    EXPECT_EQ(a, expectedResult);
+    const BigUint expected_result("1|0|0|0|0|0");
+    EXPECT_EQ(a, expected_result);
 }
 
 TEST(BigUintTest, plus_one) {
-    BigUint a;
+    BigUint a = BigUint::ZERO;
     constexpr int32_t times = BigUint::BASE - 1;
     for (int32_t ii=0; ii<times; ii++) {
         a.me_plus_one();
@@ -161,18 +161,12 @@ TEST(BigUintTest, plus_one) {
     EXPECT_EQ(a.to_string(), "1|0");
 }
 
-TEST(BigUintTest, minus_one_over_zero_launches_runtime_error) {
-    BigUint a = BigUint::ZERO;
-    EXPECT_THROW(a.me_minus_one(), std::runtime_error);
-}
-
 TEST(BigUintTest, minus_one) {
-    std::vector<BigUint::DigitType> twoDigits{1, 0};
+    EXPECT_THROW(BigUint(0).me_minus_one(), std::runtime_error);
 
-    BigUint a(twoDigits);
-    EXPECT_EQ(a.to_string(), "1|0");
+    BigUint a(BigUint::BASE);
     a.me_minus_one();
-    EXPECT_EQ(a.to_string(), "65535");
+    EXPECT_EQ(a.as_digit(), 65'535);
 
     constexpr int32_t times = BigUint::BASE - 1;
     for (int32_t ii=0; ii<times; ii++) {
@@ -181,74 +175,117 @@ TEST(BigUintTest, minus_one) {
     EXPECT_EQ(a.to_string(), "0");
 }
 
-TEST(BigUintTest, add_digit_zero) {
-    const BigUint a("1|0");
-    constexpr auto digitZero = static_cast<BigUint::DigitType>(0);
-    const auto aPlus0 = a.add(digitZero);
-    EXPECT_EQ(aPlus0, a);
+TEST(BigUintTest, add_one_digit) {
+    const BigUint a(BigUint::BASE);
+    const auto a_plus_0 = a.add(0);
+    EXPECT_EQ(a_plus_0, a);
+
+    const auto a_plus_1 = a.add(1);
+    const BigUint expected_result("1|1");
+    EXPECT_EQ(a_plus_1, expected_result);
 }
 
-TEST(BigUintTest, add_digit_one) {
-    const BigUint a("1|0");
-    constexpr auto digitOne = static_cast<BigUint::DigitType>(1);
-    const auto aPlus1 = a.add(digitOne);
-    const BigUint expectedResult("1|1");
-    EXPECT_EQ(aPlus1, expectedResult);
+TEST(BigUintTest, add_big_number) {
+    const BigUint a("65535|65535");
+    const BigUint b("1|1");
+    BigUint obtained_result = a + b;
+    BigUint expected_result("1|1|0");
+    EXPECT_EQ(obtained_result, expected_result);
+
+    const BigUint large_a("65535|65535|65535");
+    obtained_result = large_a + b;
+    expected_result = BigUint("1|0|1|0");
+    EXPECT_EQ(obtained_result, expected_result);
+
+    obtained_result = b + large_a;
+    EXPECT_EQ(obtained_result, expected_result);
+}
+
+TEST(BigUintTest, subtract_one_digit) {
+    const BigUint a("1|1");
+    const auto a_minus_0 = a.subtract(0);
+    EXPECT_EQ(a_minus_0, a);
+
+    const auto a_minus_1 = a.subtract(1);
+    BigUint expected_result("1|0");
+    EXPECT_EQ(a_minus_1, expected_result);
+
+    const auto a_minus_2 = a_minus_1.subtract(1);
+    expected_result = BigUint(65535);
+    EXPECT_EQ(a_minus_2, expected_result);
+
+    BigUint negative_result;
+    EXPECT_THROW(negative_result = BigUint(33333) - 65535, std::runtime_error);
+}
+
+TEST(BigUintTest, subtract_big_number) {
+    const BigUint a("1|65535|65534");
+    const BigUint b("65535|65535");
+    BigUint obtained_result = a - b;
+    BigUint expected_result("65535|65535");
+    EXPECT_EQ(obtained_result, expected_result);
+
+    const BigUint c("65535|65535|65535");
+    obtained_result = c - b;
+    expected_result = BigUint("65534|65535|0");
+    EXPECT_EQ(obtained_result, expected_result);
+
+    EXPECT_THROW(obtained_result = b - c;, std::runtime_error);
 }
 
 TEST(BigUintTest, multiply_by_digit_zero) {
-    const BigUint a("1|5");
-    const auto aBy0 = a.multiply_by(0);
-    EXPECT_EQ(aBy0, BigUint::ZERO);
+    const BigUint a(70'000);
+    const auto a_by_0 = a.multiply_by(0);
+    EXPECT_EQ(a_by_0, BigUint::ZERO);
 }
 
 TEST(BigUintTest, multiply_by_digit_one) {
-    const BigUint a("1|5");
-    const BigUint aBy1 = a.multiply_by(1);
-    EXPECT_EQ(aBy1, a);
+    const BigUint a(70'000);
+    const BigUint a_by_1 = a.multiply_by(1);
+    EXPECT_EQ(a_by_1, a);
 }
 
 TEST(BigUintTest, multiply_by_digit_two) {
-    const BigUint a("1|5");
-    const BigUint aBy2 = a.multiply_by(2);
-    EXPECT_EQ(aBy2, BigUint("2|10"));
+    const BigUint a(70'000);
+    const BigUint a_by_2 = a.multiply_by(2);
+    EXPECT_EQ(a_by_2, BigUint(140'000));
 }
 
 TEST(BigUintTest, multiply_by_digit_one_thousand_and_one) {
-    const BigUint a("1|5");
-    const BigUint aBy1001 = a.multiply_by(1'001);
-    EXPECT_EQ(aBy1001, BigUint("1001|5005"));
+    const BigUint a(70'000);
+    const BigUint a_by_1001 = a.multiply_by(1'001);
+    EXPECT_EQ(a_by_1001, BigUint(70'070'000));
 }
 
 TEST(BigUintTest, multiply_by_digit_base_minus_one) {
-    const BigUint baseMinusOne = BigUint("65535");
-    const BigUint square = baseMinusOne.multiply_by(65535); // Decimal: 4'294'836'225
+    const BigUint base_minus_one = BigUint(65535);
+    const BigUint square = base_minus_one.multiply_by(65535); // Decimal: 4'294'836'225
     EXPECT_EQ(square, BigUint("65534|1")); // 65'534 * 65'536 + 1 = 4'294'836'225
 }
 
 TEST(BigUintTest, multiply_by_digit_four_thousand_for_hundred_and_sixty_four) {
-    const BigUint seventyThousand("1|4464"); // Decimal: 70'000
-    const auto result = seventyThousand.multiply_by(4464); // Decimal: 312'480'000
+    const BigUint a(70'000);
+    const auto result = a.multiply_by(4464); // Decimal: 312'480'000
     const BigUint expected("4768|4352"); // 4768 * 65536 + 4352 = 312'480'000
     EXPECT_EQ(result, expected);
 }
 
 TEST(BigUintTest, multiply_by_zero) {
-    const BigUint a("1|4464"); // Decimal 70'000
-    const BigUint aBy0 = a * BigUint::ZERO;
-    EXPECT_EQ(aBy0, BigUint::ZERO);
+    const BigUint a(70'000);
+    const BigUint a_by_0 = a * BigUint::ZERO;
+    EXPECT_EQ(a_by_0, BigUint::ZERO);
 }
 
 TEST(BigUintTest, multiply_by_one) {
-    const BigUint a("1|4464"); // Decimal 70'000
-    const BigUint aBy1 = a.multiply_by(BigUint::ONE);
-    EXPECT_EQ(aBy1, a);
+    const BigUint a(70'000);
+    const BigUint a_by_1 = a.multiply_by(BigUint::ONE);
+    EXPECT_EQ(a_by_1, a);
 }
 
 TEST(BigUintTest, multiply_by_itself) {
-    const BigUint a("1|4464"); // Decimal 70'000
+    const BigUint a(70'000);
     const BigUint square = a.multiply_by(a);
-    EXPECT_EQ(square, BigUint("1|9232|4352"));
+    EXPECT_EQ(square, BigUint::from_base10_string("4900000000"));
 }
 
 TEST(BigUintTest, square) {
@@ -261,19 +298,19 @@ TEST(BigUintTest, square) {
     EXPECT_EQ(square, BigUint::ONE);
 
     BigUint a = BigUint::TWO;
-    BigUint::Digit expectedResult = 2;
+    BigUint::Digit expected_result = 2;
     for (int ii=1; ii<=3; ii++) {
        a.square_me();
-       expectedResult *= expectedResult;
-       EXPECT_EQ(a, BigUint(expectedResult));
+       expected_result *= expected_result;
+       EXPECT_EQ(a, BigUint(expected_result));
     }
 
     a.square_me();
-    EXPECT_EQ(a, BigUint("1|0"));
+    EXPECT_EQ(a, BigUint(65'536));
 
-    a = BigUint("1|4464");
+    a = BigUint(70'000);
     square = a.square();
-    EXPECT_EQ(square, BigUint("1|9232|4352"));
+    EXPECT_EQ(square, BigUint::from_base10_string("4900000000"));
 
     a = BigUint::from_base10_string("12345");
     a.square_me();
@@ -283,8 +320,8 @@ TEST(BigUintTest, square) {
 TEST(BigUintTest, big_square) {
     auto a = BigUint::from_base10_string("5000000000");
     a.square_me();
-    const auto expectedResult = BigUint::from_base10_string("25000000000000000000");
-    EXPECT_EQ(a, expectedResult);
+    const auto expected_result = BigUint::from_base10_string("25000000000000000000");
+    EXPECT_EQ(a, expected_result);
 }
 
 TEST(BigUintTest, divide_by_one) {

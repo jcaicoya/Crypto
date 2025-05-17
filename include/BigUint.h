@@ -63,17 +63,22 @@ public:
     void me_minus_one();
     [[nodiscard]] BigUint minus_one() const;
 
-    void add_to_me(DigitType digit);
+    void add_me(DigitType digit);
     [[nodiscard]] BigUint add(DigitType digit) const;
     void operator+=(DigitType digit);
     [[nodiscard]] BigUint operator+(DigitType digit) const;
 
-    void add_to_me(const BigUint &rhs);
+    void add_me(const BigUint &rhs);
     [[nodiscard]] BigUint add(const BigUint &rhs) const;
     void operator+=(const BigUint &rhs);
     [[nodiscard]] BigUint operator+(const BigUint &rhs) const;
 
-    void subtract_to_me(const BigUint &rhs);
+    void subtract_me(DigitType digit);
+    [[nodiscard]] BigUint subtract(DigitType digit) const;
+    void operator-=(DigitType digit);
+    [[nodiscard]] BigUint operator-(DigitType digit) const;
+
+    void subtract_me(const BigUint &rhs);
     [[nodiscard]] BigUint subtract(const BigUint &rhs) const;
     void operator-=(const BigUint &rhs);
     [[nodiscard]] BigUint operator-(const BigUint &rhs) const;

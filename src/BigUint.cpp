@@ -110,7 +110,7 @@ BigUint BigUint::from_string(const std::string &str) {
             if (value >= BASE) throw std::out_of_range("Digit value exceeds BASE.");
             digits_.push_back(value);
         } catch (const std::exception&) {
-            throw std::invalid_argument("Invalid digit in BigUint string.");
+            throw std::runtime_error("Invalid digit in BigUint string.");
         }
     }
 
@@ -228,7 +228,7 @@ BigUint BigUint::minus_one() const {
     return result;
 }
 
-void BigUint::add_to_me(DigitType digit) {
+void BigUint::add_me(DigitType digit) {
     if (digit == 0) {
         return;
     }
@@ -263,19 +263,19 @@ void BigUint::add_to_me(DigitType digit) {
 
 BigUint BigUint::add(DigitType digit) const {
     BigUint result = *this;
-    result.add_to_me(digit);
+    result.add_me(digit);
     return result;
 }
 
 void BigUint::operator+=(DigitType digit) {
-    add_to_me(digit);
+    add_me(digit);
 }
 
 BigUint BigUint::operator+(DigitType digit) const {
     return add(digit);
 }
 
-void BigUint::add_to_me(const BigUint &rhs) {
+void BigUint::add_me(const BigUint &rhs) {
     if (rhs == BigUint::ZERO) {
         return;
     }
@@ -342,21 +342,77 @@ void BigUint::add_to_me(const BigUint &rhs) {
 
 BigUint BigUint::add(const BigUint &rhs) const {
     auto result = *this;
-    result.add_to_me(rhs);
+    result.add_me(rhs);
     return result;
 }
 
 void BigUint::operator+=(const BigUint &rhs) {
-    add_to_me(rhs);
+    add_me(rhs);
 }
 
 BigUint BigUint::operator+(const BigUint &rhs) const {
     return add(rhs);
 }
 
-void BigUint::subtract_to_me(const BigUint &rhs) {
+void BigUint::subtract_me(DigitType digit) {
+    if (*this < digit) {
+        throw std::runtime_error("Invalid negative result expected!");
+    }
+
+    if (*this == digit) {
+        *this = BigUint::ZERO;
+        return;
+    }
+
+    if (digit == 0) {
+        return;
+    }
+
+    if (digit == 1) {
+        me_minus_one();
+        return;
+    }
+
+    if (digits_.size() == 1) {
+        digits_[0] -= digit;
+        return;
+    }
+
+    DigitType carry = digit;
+    std::size_t digit_position = 0;
+    while (digit_position < digits_.size() && carry != 0) {
+        auto &current_digit = digits_[digit_position];
+        if (current_digit >= carry) {
+            current_digit -= carry;
+            carry = 0;
+        }
+        else {
+            current_digit = static_cast<DigitType>(BigUint::BASE - carry + current_digit);
+            carry = 1;
+            digit_position++;
+        }
+    }
+
+    remove_leading_zeros();
+}
+
+BigUint BigUint::subtract(DigitType digit) const {
+    BigUint result = *this;
+    result.subtract_me(digit);
+    return result;
+}
+
+void BigUint::operator-=(DigitType digit) {
+    subtract_me(digit);
+}
+
+BigUint BigUint::operator-(DigitType digit) const {
+    return subtract(digit);
+}
+
+void BigUint::subtract_me(const BigUint &rhs) {
     if (*this < rhs) {
-        throw std::invalid_argument("Invalid negative result expected!");
+        throw std::runtime_error("Invalid negative result expected!");
     }
 
     if (rhs == BigUint::ZERO) {
@@ -405,12 +461,12 @@ void BigUint::subtract_to_me(const BigUint &rhs) {
 
 BigUint BigUint::subtract(const BigUint &rhs) const {
     auto result = *this;
-    result.subtract_to_me(rhs);
+    result.subtract_me(rhs);
     return result;
 }
 
 void BigUint::operator-=(const BigUint &rhs) {
-    return subtract_to_me(rhs);
+    return subtract_me(rhs);
 }
 
 BigUint  BigUint::operator-(const BigUint &rhs) const {
@@ -657,13 +713,13 @@ std::string BigUint::to_base10_string() const {
 }
 
 BigUint BigUint::from_base10_string(const std::string& str) {
-    if (str.empty()) throw std::invalid_argument("Empty string is not a valid number.");
+    if (str.empty()) throw std::runtime_error("Empty string is not a valid number.");
 
     BigUint result = BigUint::ZERO;
     for (auto d : str) {
-        if (!std::isdigit(d)) throw std::invalid_argument("Building BigUint: Invalid character");
+        if (!std::isdigit(d)) throw std::runtime_error("Building BigUint: Invalid character");
         result.multiply_me_by(10);
-        result.add_to_me(BigUint(static_cast<Digit>(d) - static_cast<Digit>('0')));
+        result.add_me(BigUint(static_cast<Digit>(d) - static_cast<Digit>('0')));
     }
 
     return result;
@@ -726,7 +782,7 @@ BigUint BigUint::mod_mul(const BigUint& lhs, const BigUint& rhs, const BigUint& 
 /*
 BigUint BigUint::modPow(const BigUint& exponent, const BigUint& mod) const {
     if (mod == BigUint::ZERO) {
-        throw std::invalid_argument("Modulo by zero is not allowed");
+        throw std::runtime_error("Modulo by zero is not allowed");
     }
 
     BigUint base = *this % mod;  // Reduce base modulo mod
@@ -783,7 +839,7 @@ BigUint BigUint::multiply_me_naive(const BigUint& other) const {
 
 std::pair<BigUint, BigUint> BigUint::divide_by(const BigUint &dividend, const BigUint &divisor) {
     if (divisor == BigUint::ZERO) {
-        throw std::invalid_argument("Division by zero is not allowed.");
+        throw std::runtime_error("Division by zero is not allowed.");
     }
 
     if (divisor == BigUint::ONE) {

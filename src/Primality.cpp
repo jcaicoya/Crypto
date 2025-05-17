@@ -21,7 +21,7 @@ namespace primality {
 
      bool is_divisible_by(const BigUint &number, uint8_t divisor) {
           if (divisor == 0) {
-               throw std::invalid_argument("divisor cannot be zero");
+               throw std::runtime_error("divisor cannot be zero");
           }
 
           if (divisor == 1) {
@@ -35,7 +35,7 @@ namespace primality {
 
      bool is_divisible_by(const BigUint &number, const BigUint &divisor) {
           if (divisor == BigUint::ZERO) {
-               throw std::invalid_argument("divisor cannot be zero");
+               throw std::runtime_error("divisor cannot be zero");
           }
 
           if (divisor ==  BigUint::ONE) {

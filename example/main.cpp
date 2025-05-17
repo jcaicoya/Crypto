@@ -33,7 +33,7 @@ int main() {
 
         BigUint b = BigUint::from_base10_string("123456789");
         std::cout << "b is: "; print(b) << '\n';
-        b.subtract_to_me(b);
+        b.subtract_me(b);
         std::cout << "After b.subtractToMe(b), b is: "; print(b) << "\n\n";
     }
 
