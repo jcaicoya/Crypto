@@ -12,7 +12,7 @@ std::ostream & print(const BigUint& a, std::ostream &out = std::cout) {
 }
 
 std::size_t count_number_of_lines(const std::filesystem::path &path) {
-    std::ifstream fin(path, std::ios::binary); // Bynary mode for performance
+    std::ifstream fin(path, std::ios::binary); // Binary mode for performance
     if (!fin) {
         throw std::runtime_error("Could not open file " + path.string());
     }
@@ -206,7 +206,8 @@ int main() {
     std::cout << '\n';
     std::cout << "Factoring...\n";
     std::cout << "------------\n";
-    for (int steps = 1; steps <= 5; steps++) {
+    constexpr int number_of_steps = 70;
+    for (int steps = 1; steps <= number_of_steps; steps++) {
         BigUint number = factor_table.rbegin()->first;
         number.me_plus_one();
         const auto factors = factorize(number, factor_table, prime_numbers);

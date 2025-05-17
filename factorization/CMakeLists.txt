@@ -1,5 +1,5 @@
 # Add executable for examples
-add_executable(factorization main.cpp)
+add_executable(factorization factorization-main.cpp)
 
 # Link the Crypto library to the example executable
 target_link_libraries(factorization PRIVATE Crypto)
