@@ -14,7 +14,7 @@ namespace primality {
      constexpr auto lsb_decimal_digits = generate_decimal_digit_table();
 
      uint8_t get_least_significant_byte(const BigUint &number) {
-          const auto least_significant_digit = number.getLeastSignificantDigit();
+          const auto least_significant_digit = number.get_least_significant_digit();
           const uint8_t least_significant_byte = least_significant_digit & 0xFF;
           return least_significant_byte;
      }

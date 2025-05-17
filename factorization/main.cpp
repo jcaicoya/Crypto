@@ -7,7 +7,7 @@
 #include <__msvc_filebuf.hpp>
 
 std::ostream & print(const BigUint& a, std::ostream &out = std::cout) {
-    out << a.toBase10String() << " <--> " << a.toString();
+    out << a.to_base10_string() << " <--> " << a.to_string();
     return out;
 }
 

@@ -8,15 +8,15 @@ public:
     }
 
     static [[nodiscard]] BigUint multiplyNaive(const BigUint &lhs, const BigUint& rhs) {
-        return lhs.multiplyNaive(rhs);
+        return lhs.multiply_me_naive(rhs);
     }
 
     static [[nodiscard]] BigUint multiplyKaratsuba(const BigUint &lhs, const BigUint& rhs) {
-        return lhs.multiplyKaratsuba(rhs);
+        return lhs.multiply_me_karatsuba(rhs);
     }
 
     static [[nodiscard]] BigUint multiplyFFT(const BigUint &lhs, const BigUint& rhs) {
-        return lhs.multiplyFFT(rhs);
+        return lhs.multiply_me_fft(rhs);
     }
 };
 
@@ -122,30 +122,30 @@ TEST(BigUintTest, construction_from_string_and_digit_vector) {
 }
 
 TEST(BigUintTest, check_least_significat_digit) {
-    const BigUint value = BigUint::fromBase10String("70000");
-    EXPECT_EQ(value.getLeastSignificantDigit(), static_cast<BigUint::DigitType>(4464));
+    const BigUint value = BigUint::from_base10_string("70000");
+    EXPECT_EQ(value.get_least_significant_digit(), static_cast<BigUint::DigitType>(4464));
 }
 
 TEST(BigUintTest, check_most_significat_digit) {
-    const BigUint value = BigUint::fromBase10String("70000");
-    EXPECT_EQ(value.getMostSignificantDigit(), static_cast<BigUint::DigitType>(1));
+    const BigUint value = BigUint::from_base10_string("70000");
+    EXPECT_EQ(value.get_most_significant_digit(), static_cast<BigUint::DigitType>(1));
 }
 
 TEST(BigUintTest, shift_zero_left_five_positions) {
     BigUint a = BigUint::ZERO;
-    a.shiftMeLeft(5);
+    a.shift_me_left(5);
     EXPECT_EQ(a, BigUint::ZERO);
 }
 
 TEST(BigUintTest, shift_one_left_zero_positions) {
     BigUint a = BigUint::ONE;
-    a.shiftMeLeft(0);
+    a.shift_me_left(0);
     EXPECT_EQ(a, BigUint::ONE);
 }
 
 TEST(BigUintTest, shift_one_left_five_positions) {
     BigUint a = BigUint::ONE;
-    a.shiftMeLeft(5);
+    a.shift_me_left(5);
     const BigUint expectedResult("1|0|0|0|0|0");
     EXPECT_EQ(a, expectedResult);
 }
@@ -154,31 +154,31 @@ TEST(BigUintTest, plus_one) {
     BigUint a;
     constexpr int32_t times = BigUint::BASE - 1;
     for (int32_t ii=0; ii<times; ii++) {
-        a.mePlusOne();
+        a.me_plus_one();
     }
-    EXPECT_EQ(a.toString(), "65535");
-    a.mePlusOne();
-    EXPECT_EQ(a.toString(), "1|0");
+    EXPECT_EQ(a.to_string(), "65535");
+    a.me_plus_one();
+    EXPECT_EQ(a.to_string(), "1|0");
 }
 
 TEST(BigUintTest, minus_one_over_zero_launches_runtime_error) {
     BigUint a = BigUint::ZERO;
-    EXPECT_THROW(a.meMinusOne(), std::runtime_error);
+    EXPECT_THROW(a.me_minus_one(), std::runtime_error);
 }
 
 TEST(BigUintTest, minus_one) {
     std::vector<BigUint::DigitType> twoDigits{1, 0};
 
     BigUint a(twoDigits);
-    EXPECT_EQ(a.toString(), "1|0");
-    a.meMinusOne();
-    EXPECT_EQ(a.toString(), "65535");
+    EXPECT_EQ(a.to_string(), "1|0");
+    a.me_minus_one();
+    EXPECT_EQ(a.to_string(), "65535");
 
     constexpr int32_t times = BigUint::BASE - 1;
     for (int32_t ii=0; ii<times; ii++) {
-        a.meMinusOne();
+        a.me_minus_one();
     }
-    EXPECT_EQ(a.toString(), "0");
+    EXPECT_EQ(a.to_string(), "0");
 }
 
 TEST(BigUintTest, add_digit_zero) {
@@ -198,37 +198,37 @@ TEST(BigUintTest, add_digit_one) {
 
 TEST(BigUintTest, multiply_by_digit_zero) {
     const BigUint a("1|5");
-    const auto aBy0 = a.multiplyByOneDigit(0);
+    const auto aBy0 = a.multiply_by(0);
     EXPECT_EQ(aBy0, BigUint::ZERO);
 }
 
 TEST(BigUintTest, multiply_by_digit_one) {
     const BigUint a("1|5");
-    const BigUint aBy1 = a.multiplyByOneDigit(1);
+    const BigUint aBy1 = a.multiply_by(1);
     EXPECT_EQ(aBy1, a);
 }
 
 TEST(BigUintTest, multiply_by_digit_two) {
     const BigUint a("1|5");
-    const BigUint aBy2 = a.multiplyByOneDigit(2);
+    const BigUint aBy2 = a.multiply_by(2);
     EXPECT_EQ(aBy2, BigUint("2|10"));
 }
 
 TEST(BigUintTest, multiply_by_digit_one_thousand_and_one) {
     const BigUint a("1|5");
-    const BigUint aBy1001 = a.multiplyByOneDigit(1'001);
+    const BigUint aBy1001 = a.multiply_by(1'001);
     EXPECT_EQ(aBy1001, BigUint("1001|5005"));
 }
 
 TEST(BigUintTest, multiply_by_digit_base_minus_one) {
     const BigUint baseMinusOne = BigUint("65535");
-    const BigUint square = baseMinusOne.multiplyByOneDigit(65535); // Decimal: 4'294'836'225
+    const BigUint square = baseMinusOne.multiply_by(65535); // Decimal: 4'294'836'225
     EXPECT_EQ(square, BigUint("65534|1")); // 65'534 * 65'536 + 1 = 4'294'836'225
 }
 
 TEST(BigUintTest, multiply_by_digit_four_thousand_for_hundred_and_sixty_four) {
     const BigUint seventyThousand("1|4464"); // Decimal: 70'000
-    const auto result = seventyThousand.multiplyByOneDigit(4464); // Decimal: 312'480'000
+    const auto result = seventyThousand.multiply_by(4464); // Decimal: 312'480'000
     const BigUint expected("4768|4352"); // 4768 * 65536 + 4352 = 312'480'000
     EXPECT_EQ(result, expected);
 }
@@ -241,13 +241,13 @@ TEST(BigUintTest, multiply_by_zero) {
 
 TEST(BigUintTest, multiply_by_one) {
     const BigUint a("1|4464"); // Decimal 70'000
-    const BigUint aBy1 = a.multiplyBy(BigUint::ONE);
+    const BigUint aBy1 = a.multiply_by(BigUint::ONE);
     EXPECT_EQ(aBy1, a);
 }
 
 TEST(BigUintTest, multiply_by_itself) {
     const BigUint a("1|4464"); // Decimal 70'000
-    const BigUint square = a.multiplyBy(a);
+    const BigUint square = a.multiply_by(a);
     EXPECT_EQ(square, BigUint("1|9232|4352"));
 }
 
@@ -263,116 +263,116 @@ TEST(BigUintTest, square) {
     BigUint a = BigUint::TWO;
     BigUint::Digit expectedResult = 2;
     for (int ii=1; ii<=3; ii++) {
-       a.squareMe();
+       a.square_me();
        expectedResult *= expectedResult;
        EXPECT_EQ(a, BigUint(expectedResult));
     }
 
-    a.squareMe();
+    a.square_me();
     EXPECT_EQ(a, BigUint("1|0"));
 
     a = BigUint("1|4464");
     square = a.square();
     EXPECT_EQ(square, BigUint("1|9232|4352"));
 
-    a = BigUint::fromBase10String("12345");
-    a.squareMe();
-    EXPECT_EQ(a.toBase10String(), "152399025");
+    a = BigUint::from_base10_string("12345");
+    a.square_me();
+    EXPECT_EQ(a.to_base10_string(), "152399025");
 }
 
 TEST(BigUintTest, big_square) {
-    auto a = BigUint::fromBase10String("5000000000");
-    a.squareMe();
-    const auto expectedResult = BigUint::fromBase10String("25000000000000000000");
+    auto a = BigUint::from_base10_string("5000000000");
+    a.square_me();
+    const auto expectedResult = BigUint::from_base10_string("25000000000000000000");
     EXPECT_EQ(a, expectedResult);
 }
 
 TEST(BigUintTest, divide_by_one) {
     const BigUint dividend("1|4464"); // Decimal 70'000
-    auto [quotient, remainder] = dividend.divideBy(BigUint::ONE);
+    auto [quotient, remainder] = dividend.divide_by(BigUint::ONE);
     EXPECT_EQ(quotient, dividend);
     EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
 TEST(BigUintTest, divide_by_itself) {
     const BigUint dividend("1|4464"); // Decimal 70'000
-    auto [quotient, remainder] = dividend.divideBy(dividend);
+    auto [quotient, remainder] = dividend.divide_by(dividend);
     EXPECT_EQ(quotient, BigUint::ONE);
     EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
 TEST(BigUintTest, divide_by_itself_plus_one) {
     const BigUint dividend("1|4464"); // Decimal 70'000
-    const BigUint divisor = dividend.plusOne();
-    const auto [quotient, remainder] = dividend.divideBy(divisor);
+    const BigUint divisor = dividend.plus_one();
+    const auto [quotient, remainder] = dividend.divide_by(divisor);
     EXPECT_EQ(quotient, BigUint::ZERO);
     EXPECT_EQ(remainder, dividend);
 }
 
 TEST(BigUintTest, divide_by_two) {
     const BigUint dividend("1|4464"); // Decimal 70'000
-    const auto [quotient, remainder] = dividend.divideBy(BigUint::TWO);
+    const auto [quotient, remainder] = dividend.divide_by(BigUint::TWO);
     EXPECT_EQ(quotient, BigUint(35'000));
     EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
 TEST(BigUintTest, divide_by_three) {
     const BigUint dividend("1|4464"); // Decimal 70'000
-    auto [quotient, remainder] = dividend.divideBy(BigUint(3));
+    auto [quotient, remainder] = dividend.divide_by(BigUint(3));
     EXPECT_EQ(quotient, BigUint{23'333});
     EXPECT_EQ(remainder, BigUint::ONE);
 }
 
 TEST(BigUintTest, divide_by_ten) {
     const BigUint dividend("1|4464"); // Decimal 70'000
-    auto [quotient, remainder] = dividend.divideBy(BigUint(10));
+    auto [quotient, remainder] = dividend.divide_by(BigUint(10));
     EXPECT_EQ(quotient, BigUint{7'000});
     EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
 TEST(BigUintTest, to_base_10_string) {
-    EXPECT_EQ(BigUint::ZERO.toBase10String(), "0");
-    EXPECT_EQ(BigUint::ONE.toBase10String(), "1");
-    EXPECT_EQ(BigUint::TWO.toBase10String(), "2");
-    EXPECT_EQ(BigUint::TEN.toBase10String(), "10");
+    EXPECT_EQ(BigUint::ZERO.to_base10_string(), "0");
+    EXPECT_EQ(BigUint::ONE.to_base10_string(), "1");
+    EXPECT_EQ(BigUint::TWO.to_base10_string(), "2");
+    EXPECT_EQ(BigUint::TEN.to_base10_string(), "10");
     constexpr BigUint::WideDigit baseWideDigit = BigUint::BASE;
     constexpr auto baseMinusOneDigit = static_cast<BigUint::Digit>(baseWideDigit - 1);
     const BigUint baseMinusOne(baseMinusOneDigit);
-    EXPECT_EQ(baseMinusOne.toBase10String(), "65535");
+    EXPECT_EQ(baseMinusOne.to_base10_string(), "65535");
     const BigUint base = baseMinusOne + 1;
-    EXPECT_EQ(base.toBase10String(), "65536");
-    EXPECT_EQ(BigUint("1|4464").toBase10String(), "70000");
-    EXPECT_EQ(BigUint("1|9232|4352").toBase10String(), "4900000000");
+    EXPECT_EQ(base.to_base10_string(), "65536");
+    EXPECT_EQ(BigUint("1|4464").to_base10_string(), "70000");
+    EXPECT_EQ(BigUint("1|9232|4352").to_base10_string(), "4900000000");
 }
 
 TEST(BigUintTest, ModularAddition) {
-    const BigUint a = BigUint::fromBase10String("12345");
-    const BigUint b = BigUint::fromBase10String("67890");
-    const BigUint mod = BigUint::fromBase10String("100000");
-    const auto result = BigUint::modAdd(a, b, mod);
-    const auto expected = BigUint::fromBase10String("80235");
+    const BigUint a = BigUint::from_base10_string("12345");
+    const BigUint b = BigUint::from_base10_string("67890");
+    const BigUint mod = BigUint::from_base10_string("100000");
+    const auto result = BigUint::mod_add(a, b, mod);
+    const auto expected = BigUint::from_base10_string("80235");
     EXPECT_EQ(result, expected);
 }
 
 TEST(BigUintTest, ModularSubtraction) {
-    const BigUint a = BigUint::fromBase10String("123456");
-    const BigUint b = BigUint::fromBase10String("678901");
-    const BigUint mod = BigUint::fromBase10String("100000");
-    const auto bModSubAResult = BigUint::modSub(b, a, mod);
-    auto expected = BigUint::fromBase10String("55445");
+    const BigUint a = BigUint::from_base10_string("123456");
+    const BigUint b = BigUint::from_base10_string("678901");
+    const BigUint mod = BigUint::from_base10_string("100000");
+    const auto bModSubAResult = BigUint::mod_sub(b, a, mod);
+    auto expected = BigUint::from_base10_string("55445");
     EXPECT_EQ(bModSubAResult, expected);
 
-    const auto aModSubBResult = BigUint::modSub(a, b, mod);
-    expected = BigUint::fromBase10String("44555");
+    const auto aModSubBResult = BigUint::mod_sub(a, b, mod);
+    expected = BigUint::from_base10_string("44555");
     EXPECT_EQ(aModSubBResult, expected);
 }
 
 TEST(BigUintTest, ModularMultiplication) {
-    const BigUint a = BigUint::fromBase10String("12345");
-    const BigUint b = BigUint::fromBase10String("67890");
-    const BigUint mod = BigUint::fromBase10String("10000");
-    const auto result = BigUint::modMul(a, b, mod); // multiplication is 838.102.050
-    const auto expected = BigUint::fromBase10String("2050");
+    const BigUint a = BigUint::from_base10_string("12345");
+    const BigUint b = BigUint::from_base10_string("67890");
+    const BigUint mod = BigUint::from_base10_string("10000");
+    const auto result = BigUint::mod_mul(a, b, mod); // multiplication is 838.102.050
+    const auto expected = BigUint::from_base10_string("2050");
     EXPECT_EQ(result, expected);
 }
 
@@ -399,26 +399,26 @@ TEST(BigUintTest, ModularExponentiation) {
 */
 
 TEST(BigUintTest, NaiveMultiplication) {
-    const BigUint a = BigUint::fromBase10String("123456789");
-    const BigUint b = BigUint::fromBase10String("987654321");
+    const BigUint a = BigUint::from_base10_string("123456789");
+    const BigUint b = BigUint::from_base10_string("987654321");
     const BigUint result = BigUintTestAccessor::multiplyNaive(a, b);
-    const BigUint expected = BigUint::fromBase10String("121932631112635269");
+    const BigUint expected = BigUint::from_base10_string("121932631112635269");
     EXPECT_EQ(result, expected);
 }
 
 TEST(BigUintTest, KaratsubaMultiplication) {
-    const BigUint a = BigUint::fromBase10String("123456789");
-    const BigUint b = BigUint::fromBase10String("987654321");
+    const BigUint a = BigUint::from_base10_string("123456789");
+    const BigUint b = BigUint::from_base10_string("987654321");
     const BigUint result = BigUintTestAccessor::multiplyFFT(a, b);
-    const BigUint expected = BigUint::fromBase10String("121932631112635269");
+    const BigUint expected = BigUint::from_base10_string("121932631112635269");
     EXPECT_EQ(result, expected);
 }
 
 TEST(BigUintTest, FFTMultiplication) {
-    const BigUint a = BigUint::fromBase10String("123456789");
-    const BigUint b = BigUint::fromBase10String("987654321");
+    const BigUint a = BigUint::from_base10_string("123456789");
+    const BigUint b = BigUint::from_base10_string("987654321");
     const BigUint result = BigUintTestAccessor::multiplyFFT(a, b);
-    const BigUint expected = BigUint::fromBase10String("121932631112635269");
+    const BigUint expected = BigUint::from_base10_string("121932631112635269");
     EXPECT_EQ(result, expected);
 }
 

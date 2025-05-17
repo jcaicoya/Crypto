@@ -33,20 +33,20 @@ public:
     static const BigUint TWO;
     static const BigUint TEN;
 
-    [[nodiscard]] std::optional<DigitType> asDigit() const;
-    [[nodiscard]] std::optional<WideDigitType> asWideDigit() const;
-    [[nodiscard]] std::optional<ByteType> asByteDigit() const;
+    [[nodiscard]] std::optional<DigitType> as_digit() const;
+    [[nodiscard]] std::optional<WideDigitType> as_wide_digit() const;
+    [[nodiscard]] std::optional<ByteType> as_byte_digit() const;
 
-    [[nodiscard]] Digit getLeastSignificantDigit() const { return digits_.front(); }
-    [[nodiscard]] Digit getMostSignificantDigit() const { return digits_.back(); }
+    [[nodiscard]] Digit get_least_significant_digit() const { return digits_.front(); }
+    [[nodiscard]] Digit get_most_significant_digit() const { return digits_.back(); }
 
-    void setZero() { *this = BigUint::ZERO; }
-    void setOne() { *this = BigUint::ONE; }
-    void setDigits(const Digits &digits);
-    [[nodiscard]] const Digits & getDigits() const { return digits_; }
+    void set_zero() { *this = BigUint::ZERO; }
+    void set_one() { *this = BigUint::ONE; }
+    void set_digits(const Digits &digits);
+    [[nodiscard]] const Digits & get_digits() const { return digits_; }
 
-    [[nodiscard]] std::string toString() const;
-    BigUint fromString(const std::string &input);
+    [[nodiscard]] std::string to_string() const;
+    BigUint from_string(const std::string &input);
 
     friend std::ostream& operator<<(std::ostream& os, const BigUint& bigUint);
     friend std::istream& operator>>(std::istream& is, BigUint& bigUint);
@@ -54,47 +54,47 @@ public:
     std::strong_ordering operator<=>(const BigUint& other) const;
     bool operator==(const BigUint& other) const = default;  // optional if using spaceship
 
-    void shiftMeLeft(size_t shiftPositions);
-    [[nodiscard]] BigUint shiftLeft(size_t shiftPositions) const;
+    void shift_me_left(size_t shiftPositions);
+    [[nodiscard]] BigUint shift_left(size_t shiftPositions) const;
 
-    void mePlusOne();
-    [[nodiscard]] BigUint plusOne() const;
+    void me_plus_one();
+    [[nodiscard]] BigUint plus_one() const;
 
-    void meMinusOne();
-    [[nodiscard]] BigUint minusOne() const;
+    void me_minus_one();
+    [[nodiscard]] BigUint minus_one() const;
 
-    void addToMe(DigitType digit);
+    void add_to_me(DigitType digit);
     [[nodiscard]] BigUint add(DigitType digit) const;
     void operator+=(DigitType digit);
     [[nodiscard]] BigUint operator+(DigitType digit) const;
 
-    void addToMe(const BigUint &rhs);
+    void add_to_me(const BigUint &rhs);
     [[nodiscard]] BigUint add(const BigUint &rhs) const;
     void operator+=(const BigUint &rhs);
     [[nodiscard]] BigUint operator+(const BigUint &rhs) const;
 
-    void subtractToMe(const BigUint &rhs);
+    void subtract_to_me(const BigUint &rhs);
     [[nodiscard]] BigUint subtract(const BigUint &rhs) const;
     void operator-=(const BigUint &rhs);
     [[nodiscard]] BigUint operator-(const BigUint &rhs) const;
 
-    void multiplyMeByOneDigit(DigitType digit);
-    [[nodiscard]] BigUint multiplyByOneDigit(DigitType digit) const;
+    void multiply_me_by(DigitType digit);
+    [[nodiscard]] BigUint multiply_by(DigitType digit) const;
     void operator*=(DigitType digit);
     [[nodiscard]] BigUint operator*(DigitType digit) const;
 
-    void multiplyMeBy(const BigUint &rhs);
-    [[nodiscard]] BigUint multiplyBy(const BigUint &rhs) const;
+    void multiply_me_by(const BigUint &rhs);
+    [[nodiscard]] BigUint multiply_by(const BigUint &rhs) const;
     void operator*=(const BigUint &rhs);
     [[nodiscard]] BigUint operator*(const BigUint &rhs) const;
 
-    void squareMe();
+    void square_me();
     [[nodiscard]] BigUint square() const;
 
     // returns the remainder
-    BigUint::DigitType divideMeByOneDigit(DigitType digit);
+    BigUint::DigitType divide_me_by(DigitType digit);
     // returns quotient and remainder
-    [[nodiscard]] std::pair<BigUint, BigUint::DigitType> divideByOneDigit(DigitType digit) const;
+    [[nodiscard]] std::pair<BigUint, BigUint::DigitType> divide_by(DigitType digit) const;
     // returns the quotient
     BigUint operator/=(DigitType digit);
     // returns the quotient
@@ -105,9 +105,9 @@ public:
     [[nodiscard]] BigUint::DigitType operator%(DigitType) const;
 
     // returns the remainder
-    BigUint divideMeBy(const BigUint &rhs);
+    BigUint divide_me_by(const BigUint &rhs);
     // returns quotient and remainder
-    [[nodiscard]] std::pair<BigUint, BigUint> divideBy(const BigUint &rhsr) const;
+    [[nodiscard]] std::pair<BigUint, BigUint> divide_by(const BigUint &rhsr) const;
     // returns the quotient
     BigUint operator/=(const BigUint &rhs);
     // returns the quotient
@@ -117,12 +117,12 @@ public:
     // returns the remainder
     [[nodiscard]] BigUint operator%(const BigUint &rhs) const;
 
-    [[nodiscard]] std::string toBase10String() const;
-    static [[nodiscard]] BigUint fromBase10String(const std::string &input);
+    [[nodiscard]] std::string to_base10_string() const;
+    static [[nodiscard]] BigUint from_base10_string(const std::string &input);
 
-    static [[nodiscard]] BigUint modAdd(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
-    static [[nodiscard]] BigUint modSub(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
-    static [[nodiscard]] BigUint modMul(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
+    static [[nodiscard]] BigUint mod_add(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
+    static [[nodiscard]] BigUint mod_sub(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
+    static [[nodiscard]] BigUint mod_mul(const BigUint& lhs, const BigUint& rhs, const BigUint& mod);
     /*
     [[nodiscard]] BigUint modPow(const BigUint& other, const BigUint& mod) const;
     */
@@ -133,17 +133,17 @@ public:
 private:
     Digits digits_; // Digits stored in reverse order for easier arithmetic
 
-    void removeLeadingZeros();
-    [[nodiscard]] BigUint multiplyNaive(const BigUint& other) const;
-    static std::pair<BigUint, BigUint> divide(const BigUint &dividend, const BigUint &divisor);
+    void remove_leading_zeros();
+    [[nodiscard]] BigUint multiply_me_naive(const BigUint& other) const;
+    static std::pair<BigUint, BigUint> divide_by(const BigUint &dividend, const BigUint &divisor);
 
     // Multiplications
-    [[nodiscard]] BigUint multiplyFFT(const BigUint& other) const;
+    [[nodiscard]] BigUint multiply_me_fft(const BigUint& other) const;
     [[nodiscard]] std::pair<BigUint, BigUint> split(std::size_t pos) const;
-    [[nodiscard]] BigUint multiplyKaratsuba(const BigUint& other) const;
+    [[nodiscard]] BigUint multiply_me_karatsuba(const BigUint& other) const;
 
     // Helpers
-    static [[nodiscard]] std::vector<BigUint::DigitType> optInnerSquare(const std::vector<BigUint::DigitType> &digits);
+    static [[nodiscard]] std::vector<BigUint::DigitType> opt_inner_square(const std::vector<BigUint::DigitType> &digits);
 };
 
 std::ostream& operator<<(std::ostream& os, const BigUint& bigUint);

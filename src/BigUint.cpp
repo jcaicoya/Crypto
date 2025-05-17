@@ -25,7 +25,7 @@ BigUint::BigUint(WideDigit digit) {
 }
 
 BigUint::BigUint(const std::string& str) {
-    fromString(str);
+    from_string(str);
 }
 
 BigUint::BigUint(const std::vector<DigitType> &digits)
@@ -37,7 +37,7 @@ BigUint::BigUint(const std::vector<DigitType> &digits)
     std::ranges::reverse(digits_.begin(), digits_.end());
 }
 
-std::optional<BigUint::DigitType> BigUint::asDigit() const {
+std::optional<BigUint::DigitType> BigUint::as_digit() const {
     if (digits_.size() == 1) {
         return digits_[0];
     }
@@ -45,7 +45,7 @@ std::optional<BigUint::DigitType> BigUint::asDigit() const {
     return std::nullopt;
 }
 
-std::optional<BigUint::WideDigitType> BigUint::asWideDigit() const {
+std::optional<BigUint::WideDigitType> BigUint::as_wide_digit() const {
     if (digits_.size() == 1) {
         return static_cast<WideDigitType>(digits_[0]);
     }
@@ -58,7 +58,7 @@ std::optional<BigUint::WideDigitType> BigUint::asWideDigit() const {
     return std::nullopt;
 }
 
-std::optional<BigUint::ByteType> BigUint::asByteDigit() const {
+std::optional<BigUint::ByteType> BigUint::as_byte_digit() const {
     if (digits_.size() > 1) {
         return std::nullopt;
     }
@@ -71,15 +71,15 @@ std::optional<BigUint::ByteType> BigUint::asByteDigit() const {
     return static_cast<ByteType>(digit);
 }
 
-void BigUint::setDigits(const Digits &digits) {
+void BigUint::set_digits(const Digits &digits) {
     digits_ = digits;
-    removeLeadingZeros();
+    remove_leading_zeros();
     if (digits_.empty()) {
         *this = BigUint::ZERO;
     };
 }
 
-std::string BigUint::toString() const {
+std::string BigUint::to_string() const {
     if (*this == ZERO) return "0";
     if (*this == ONE) return "1";
     if (*this == TWO) return "2";
@@ -94,7 +94,7 @@ std::string BigUint::toString() const {
     return result;
 }
 
-BigUint BigUint::fromString(const std::string &str) {
+BigUint BigUint::from_string(const std::string &str) {
     if (str.empty()) {
         *this = ZERO;
         return *this;
@@ -115,7 +115,7 @@ BigUint BigUint::fromString(const std::string &str) {
     }
 
     std::ranges::reverse(digits_.begin(), digits_.end());
-    removeLeadingZeros();
+    remove_leading_zeros();
     return *this;
 }
 
@@ -131,7 +131,7 @@ std::strong_ordering BigUint::operator<=>(const BigUint& other) const {
     return std::strong_ordering::equal;
 }
 
-void BigUint::shiftMeLeft(const size_t shiftPositions) {
+void BigUint::shift_me_left(const size_t shiftPositions) {
     if (shiftPositions == 0) {
         return;
     }
@@ -152,13 +152,13 @@ void BigUint::shiftMeLeft(const size_t shiftPositions) {
     }
 }
 
-BigUint BigUint::shiftLeft(const size_t shiftPositions) const {
+BigUint BigUint::shift_left(const size_t shiftPositions) const {
     BigUint result = *this;
-    result.shiftMeLeft(shiftPositions);
+    result.shift_me_left(shiftPositions);
     return result;
 }
 
-void BigUint::mePlusOne() {
+void BigUint::me_plus_one() {
     if (*this == ZERO) {
         *this = ONE;
         return;
@@ -184,13 +184,13 @@ void BigUint::mePlusOne() {
     digits_.push_back(1);
 }
 
-BigUint BigUint::plusOne() const {
+BigUint BigUint::plus_one() const {
     auto result = *this;
-    result.mePlusOne();
+    result.me_plus_one();
     return result;
 }
 
-void BigUint::meMinusOne() {
+void BigUint::me_minus_one() {
     if (*this == ZERO) {
         throw std::runtime_error("Invalid negative result expected!");
     }
@@ -222,13 +222,13 @@ void BigUint::meMinusOne() {
     }
 }
 
-BigUint BigUint::minusOne() const {
+BigUint BigUint::minus_one() const {
     auto result = *this;
-    result.meMinusOne();
+    result.me_minus_one();
     return result;
 }
 
-void BigUint::addToMe(DigitType digit) {
+void BigUint::add_to_me(DigitType digit) {
     if (digit == 0) {
         return;
     }
@@ -239,7 +239,7 @@ void BigUint::addToMe(DigitType digit) {
     }
 
     if (digit == 1) {
-        mePlusOne();
+        me_plus_one();
         return;
     }
 
@@ -263,19 +263,19 @@ void BigUint::addToMe(DigitType digit) {
 
 BigUint BigUint::add(DigitType digit) const {
     BigUint result = *this;
-    result.addToMe(digit);
+    result.add_to_me(digit);
     return result;
 }
 
 void BigUint::operator+=(DigitType digit) {
-    addToMe(digit);
+    add_to_me(digit);
 }
 
 BigUint BigUint::operator+(DigitType digit) const {
     return add(digit);
 }
 
-void BigUint::addToMe(const BigUint &rhs) {
+void BigUint::add_to_me(const BigUint &rhs) {
     if (rhs == BigUint::ZERO) {
         return;
     }
@@ -342,19 +342,19 @@ void BigUint::addToMe(const BigUint &rhs) {
 
 BigUint BigUint::add(const BigUint &rhs) const {
     auto result = *this;
-    result.addToMe(rhs);
+    result.add_to_me(rhs);
     return result;
 }
 
 void BigUint::operator+=(const BigUint &rhs) {
-    addToMe(rhs);
+    add_to_me(rhs);
 }
 
 BigUint BigUint::operator+(const BigUint &rhs) const {
     return add(rhs);
 }
 
-void BigUint::subtractToMe(const BigUint &rhs) {
+void BigUint::subtract_to_me(const BigUint &rhs) {
     if (*this < rhs) {
         throw std::invalid_argument("Invalid negative result expected!");
     }
@@ -400,24 +400,24 @@ void BigUint::subtractToMe(const BigUint &rhs) {
     }
 
     digits_ = result;;
-    removeLeadingZeros();
+    remove_leading_zeros();
 }
 
 BigUint BigUint::subtract(const BigUint &rhs) const {
     auto result = *this;
-    result.subtractToMe(rhs);
+    result.subtract_to_me(rhs);
     return result;
 }
 
 void BigUint::operator-=(const BigUint &rhs) {
-    return subtractToMe(rhs);
+    return subtract_to_me(rhs);
 }
 
 BigUint  BigUint::operator-(const BigUint &rhs) const {
     return subtract(rhs);
 }
 
-void BigUint::multiplyMeByOneDigit(DigitType digit) {
+void BigUint::multiply_me_by(DigitType digit) {
     if (digit == 0) {
         *this = BigUint::ZERO;
         return;
@@ -458,39 +458,39 @@ void BigUint::multiplyMeByOneDigit(DigitType digit) {
     }
 }
 
-BigUint BigUint::multiplyByOneDigit(const DigitType digit) const {
+BigUint BigUint::multiply_by(const DigitType digit) const {
     BigUint result = *this;
-    result.multiplyMeByOneDigit(digit);
+    result.multiply_me_by(digit);
     return result;
 }
 
 void BigUint::operator*=(const DigitType digit) {
-    multiplyMeByOneDigit(digit);
+    multiply_me_by(digit);
 }
 
 BigUint BigUint::operator*(const DigitType digit) const {
-    return multiplyByOneDigit(digit);
+    return multiply_by(digit);
 }
 
-void BigUint::multiplyMeBy(const BigUint &rhs) {
-    *this = multiplyNaive(rhs);
+void BigUint::multiply_me_by(const BigUint &rhs) {
+    *this = multiply_me_naive(rhs);
 }
 
-BigUint BigUint::multiplyBy(const BigUint &rhs) const {
+BigUint BigUint::multiply_by(const BigUint &rhs) const {
     BigUint result = *this;
-    result.multiplyMeBy(rhs);
+    result.multiply_me_by(rhs);
     return result;
 }
 
 void BigUint::operator*=(const BigUint &rhs) {
-    multiplyMeBy(rhs);
+    multiply_me_by(rhs);
 }
 
 BigUint BigUint::operator*(const BigUint &rhs) const {
-    return multiplyBy(rhs);
+    return multiply_by(rhs);
 }
 
-void BigUint::squareMe() {
+void BigUint::square_me() {
     *this = square();
 }
 
@@ -519,14 +519,14 @@ void BigUint::squareMe() {
         return result;
     }
 
-    const auto resultDigits = optInnerSquare(digits_);
+    const auto resultDigits = opt_inner_square(digits_);
     BigUint result;
     result.digits_ = resultDigits;
     return result;
 }
 
 // returns the remainder
-BigUint::DigitType BigUint::divideMeByOneDigit(const DigitType divisor) {
+BigUint::DigitType BigUint::divide_me_by(const DigitType divisor) {
     if (divisor == 0) {
         throw std::runtime_error("division by zero");
     }
@@ -570,72 +570,72 @@ BigUint::DigitType BigUint::divideMeByOneDigit(const DigitType divisor) {
 }
 
 // returns quotient and remainder
-std::pair<BigUint, BigUint::DigitType> BigUint::divideByOneDigit(const DigitType divisor) const {
+std::pair<BigUint, BigUint::DigitType> BigUint::divide_by(const DigitType divisor) const {
     BigUint quotient = *this;
-    auto remainder = quotient.divideMeByOneDigit(divisor);
+    auto remainder = quotient.divide_me_by(divisor);
     return {quotient, remainder};
 }
 
 // returns the quotient
 BigUint BigUint::operator/=(DigitType digit) {
-    divideMeByOneDigit(digit);
+    divide_me_by(digit);
     return *this;
 }
 
 // returns the quotient
 BigUint BigUint::operator/(DigitType digit) const {
-    const auto [quotient, remainder] = divideByOneDigit(digit);
+    const auto [quotient, remainder] = divide_by(digit);
     return quotient;
 }
 
 // returns the remainder
 BigUint::DigitType BigUint::operator%=(DigitType digit) {
-    return divideMeByOneDigit(digit);
+    return divide_me_by(digit);
 }
 
 // returns the remainder
 BigUint::DigitType BigUint::operator%(DigitType digit) const {
-    const auto [quotient, remainder] = divideByOneDigit(digit);
+    const auto [quotient, remainder] = divide_by(digit);
     return remainder;
 }
 
 // returns the remainder
-BigUint BigUint::divideMeBy(const BigUint &rhs) {
-    const auto [quotient, remainder] = divide(*this, rhs);
+BigUint BigUint::divide_me_by(const BigUint &rhs) {
+    const auto [quotient, remainder] = divide_by(*this, rhs);
     *this = quotient;
     return remainder;
 }
 
 // returns quotient and remainder
-[[nodiscard]] std::pair<BigUint, BigUint> BigUint::divideBy(const BigUint &rhs) const {
-    return divide(*this, rhs);
+[[nodiscard]] std::pair<BigUint, BigUint> BigUint::divide_by(const BigUint &rhs) const {
+    return divide_by(*this, rhs);
 }
 
 // returns the quotient
 BigUint BigUint::operator/=(const BigUint &rhs) {
-    const auto [quotient, _] = divide(*this, rhs);
+    const auto [quotient, _] = divide_by(*this, rhs);
     *this = quotient;
     return quotient;
 }
 
 // returns the quotient
 BigUint BigUint::operator/(const BigUint &rhs) const {
-    const auto [quotient, _] = divideBy(rhs);
+    const auto [quotient, _] = divide_by(rhs);
     return quotient;
 }
 
 // returns the remainder
 BigUint BigUint::operator%=(const BigUint &rhs) {
-    return divideMeBy(rhs);
+    return divide_me_by(rhs);
 }
 
 // returns the remainder
 [[nodiscard]] BigUint BigUint::operator%(const BigUint &rhs) const {
-    const auto [_, remainder] = divideBy(rhs);
+    const auto [_, remainder] = divide_by(rhs);
     return remainder;
 }
 
-std::string BigUint::toBase10String() const {
+std::string BigUint::to_base10_string() const {
     if (*this == ZERO) return "0";
     if (*this == ONE) return "1";
     if (*this == TWO) return "2";
@@ -647,7 +647,7 @@ std::string BigUint::toBase10String() const {
     BigUint value = *this;
     std::string result;
     while (value.digits_.size() > 1) {
-        const auto [quotient, remainder] = value.divideByOneDigit(10);
+        const auto [quotient, remainder] = value.divide_by(10);
         result += static_cast<char>('0' + remainder);
         value = quotient;
     }
@@ -656,20 +656,20 @@ std::string BigUint::toBase10String() const {
     return std::to_string(value.digits_[0]) + result;
 }
 
-BigUint BigUint::fromBase10String(const std::string& str) {
+BigUint BigUint::from_base10_string(const std::string& str) {
     if (str.empty()) throw std::invalid_argument("Empty string is not a valid number.");
 
     BigUint result = BigUint::ZERO;
     for (auto d : str) {
         if (!std::isdigit(d)) throw std::invalid_argument("Building BigUint: Invalid character");
-        result.multiplyMeByOneDigit(10);
-        result.addToMe(BigUint(static_cast<Digit>(d) - static_cast<Digit>('0')));
+        result.multiply_me_by(10);
+        result.add_to_me(BigUint(static_cast<Digit>(d) - static_cast<Digit>('0')));
     }
 
     return result;
 }
 
-BigUint BigUint::modAdd(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
+BigUint BigUint::mod_add(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
     if (mod == BigUint::ZERO) {
         throw std::runtime_error("modulus value cannot be zero");
     }
@@ -688,7 +688,7 @@ BigUint BigUint::modAdd(const BigUint& lhs, const BigUint& rhs, const BigUint& m
     return result;
 }
 
-BigUint BigUint::modSub(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
+BigUint BigUint::mod_sub(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
     if (mod == BigUint::ZERO) {
         throw std::runtime_error("modulus value cannot be zero");
     }
@@ -708,7 +708,7 @@ BigUint BigUint::modSub(const BigUint& lhs, const BigUint& rhs, const BigUint& m
     return result;
 }
 
-BigUint BigUint::modMul(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
+BigUint BigUint::mod_mul(const BigUint& lhs, const BigUint& rhs, const BigUint& mod) {
     if (mod == BigUint::ZERO) {
         throw std::runtime_error("modulus value cannot be zero");
     }
@@ -745,7 +745,7 @@ BigUint BigUint::modPow(const BigUint& exponent, const BigUint& mod) const {
 }
 */
 
-void BigUint::removeLeadingZeros() {
+void BigUint::remove_leading_zeros() {
     while (digits_.size() > 1 && digits_.back() == 0) {
         digits_.pop_back();
     }
@@ -755,20 +755,20 @@ void BigUint::removeLeadingZeros() {
     }
 }
 
-BigUint BigUint::multiplyNaive(const BigUint& other) const {
+BigUint BigUint::multiply_me_naive(const BigUint& other) const {
     if (other.digits_.size() == 1) {
-        return multiplyByOneDigit(other.digits_.front());
+        return multiply_by(other.digits_.front());
     }
 
     if (digits_.size() == 1) {
-        return other.multiplyByOneDigit(digits_.front());
+        return other.multiply_by(digits_.front());
     }
 
     std::vector<BigUint> partialMultiplications(other.digits_.size());
     std::size_t shiftCounter = 0;
     for (const auto otherCurrentDigit : other.digits_) {
-        BigUint currentMultiplication = this->multiplyByOneDigit(otherCurrentDigit);
-        currentMultiplication.shiftMeLeft(shiftCounter);
+        BigUint currentMultiplication = this->multiply_by(otherCurrentDigit);
+        currentMultiplication.shift_me_left(shiftCounter);
         partialMultiplications[shiftCounter] = currentMultiplication;
         shiftCounter++;
     }
@@ -781,7 +781,7 @@ BigUint BigUint::multiplyNaive(const BigUint& other) const {
     return result;
 }
 
-std::pair<BigUint, BigUint> BigUint::divide(const BigUint &dividend, const BigUint &divisor) {
+std::pair<BigUint, BigUint> BigUint::divide_by(const BigUint &dividend, const BigUint &divisor) {
     if (divisor == BigUint::ZERO) {
         throw std::invalid_argument("Division by zero is not allowed.");
     }
@@ -800,7 +800,7 @@ std::pair<BigUint, BigUint> BigUint::divide(const BigUint &dividend, const BigUi
 
     if (divisor.digits_.size() == 1) {
         const auto digit = divisor.digits_.front();
-        const auto [quotient, remainder] = dividend.divideByOneDigit(digit);
+        const auto [quotient, remainder] = dividend.divide_by(digit);
         const BigUint remainderAsUint(remainder);
         return {quotient, remainderAsUint};
     }
@@ -811,7 +811,7 @@ std::pair<BigUint, BigUint> BigUint::divide(const BigUint &dividend, const BigUi
     // Process digits from most to least significant
     for (int i = static_cast<int>(dividend.digits_.size()) - 1; i >= 0; --i) {
         remainder.digits_.insert(remainder.digits_.begin(), dividend.digits_[i]);  // Shift remainder
-        remainder.removeLeadingZeros();
+        remainder.remove_leading_zeros();
 
         DigitType q = 0;
         if (remainder >= divisor) {
@@ -836,8 +836,8 @@ std::pair<BigUint, BigUint> BigUint::divide(const BigUint &dividend, const BigUi
         quotient.digits_.insert(quotient.digits_.begin(), q);
     }
 
-    quotient.removeLeadingZeros();
-    remainder.removeLeadingZeros();
+    quotient.remove_leading_zeros();
+    remainder.remove_leading_zeros();
     return {quotient, remainder};
 }
 
@@ -874,7 +874,7 @@ void fft(std::vector<std::complex<double>>& a, bool invert) {
     }
 }
 
-BigUint BigUint::multiplyFFT(const BigUint& b) const {
+BigUint BigUint::multiply_me_fft(const BigUint& b) const {
     // Convert BigUint digits to complex vectors
     std::vector<std::complex<double>> fa(this->digits_.begin(), this->digits_.end());
     std::vector<std::complex<double>> fb(b.digits_.begin(), b.digits_.end());
@@ -925,28 +925,28 @@ std::pair<BigUint, BigUint> BigUint::split(std::size_t pos) const {
     BigUint low, high;
     low.digits_.assign(digits_.begin(), digits_.begin() + static_cast<diff_t>(pos));
     high.digits_.assign(digits_.begin() + static_cast<diff_t>(pos), digits_.end());
-    high.removeLeadingZeros();
+    high.remove_leading_zeros();
     return {low, high};
 }
 
 // NOLINTNEXTLINE(misc-no-recursion)
-BigUint BigUint::multiplyKaratsuba(const BigUint& other) const {
+BigUint BigUint::multiply_me_karatsuba(const BigUint& other) const {
     if (constexpr std::size_t minimumNumberOfDigits = 2; digits_.size() < minimumNumberOfDigits || other.digits_.size() < minimumNumberOfDigits) {
-        return multiplyNaive(other);
+        return multiply_me_naive(other);
     }
 
     const size_t middle = digits_.size() / 2;
     const auto [low1, high1] = split(middle);
     const auto [low2, high2] = other.split(middle);
 
-    const BigUint z0 = low1.multiplyKaratsuba(low2);
-    const BigUint z1 = (low1 + high1).multiplyKaratsuba(low2 + high2);
-    const BigUint z2 = high1.multiplyKaratsuba(high2);
+    const BigUint z0 = low1.multiply_me_karatsuba(low2);
+    const BigUint z1 = (low1 + high1).multiply_me_karatsuba(low2 + high2);
+    const BigUint z2 = high1.multiply_me_karatsuba(high2);
 
-    return (z2.shiftLeft(2 * middle) + (z1 - z2 - z0).shiftLeft(middle) + z0);
+    return (z2.shift_left(2 * middle) + (z1 - z2 - z0).shift_left(middle) + z0);
 }
 
-[[nodiscard]] std::vector<BigUint::DigitType> BigUint::optInnerSquare(const std::vector<BigUint::DigitType> &digits) {
+[[nodiscard]] std::vector<BigUint::DigitType> BigUint::opt_inner_square(const std::vector<BigUint::DigitType> &digits) {
     const size_t n = digits.size();
     std::vector<BigUint::WideDigitType> wideDigits(2 * n, static_cast<BigUint::WideDigit>(0));
 
@@ -995,7 +995,7 @@ BigUint BigUint::multiplyKaratsuba(const BigUint& other) const {
 }
 
 std::ostream& operator<<(std::ostream& os, const BigUint& bigUint) {
-    return os << bigUint.toBase10String();
+    return os << bigUint.to_base10_string();
 }
 
 std::istream& operator>>(std::istream& is, BigUint& bigUint) {
@@ -1004,6 +1004,6 @@ std::istream& operator>>(std::istream& is, BigUint& bigUint) {
     if (!(is >> number)) {
         is.setstate(std::ios::failbit);
     }
-    bigUint = BigUint::fromBase10String(number);
+    bigUint = BigUint::from_base10_string(number);
     return is;
 }

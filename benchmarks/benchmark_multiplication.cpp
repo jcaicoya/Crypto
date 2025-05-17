@@ -9,15 +9,15 @@ public:
     }
 
     static [[nodiscard]] BigUint multiplyNaive(const BigUint &lhs, const BigUint& rhs) {
-        return lhs.multiplyNaive(rhs);
+        return lhs.multiply_me_naive(rhs);
     }
 
     static [[nodiscard]] BigUint multiplyKaratsuba(const BigUint &lhs, const BigUint& rhs) {
-        return lhs.multiplyKaratsuba(rhs);
+        return lhs.multiply_me_karatsuba(rhs);
     }
 
     static [[nodiscard]] BigUint multiplyFFT(const BigUint &lhs, const BigUint& rhs) {
-        return lhs.multiplyFFT(rhs);
+        return lhs.multiply_me_fft(rhs);
     }
 };
 
