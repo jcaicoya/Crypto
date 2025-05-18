@@ -178,7 +178,8 @@ void write_number_and_factors_at_the_end_of_file(const BigUint &number, const st
 }
 
 int main() {
-    const std::filesystem::path file_path = std::filesystem::current_path() / "resources"/ "factorization.txt";
+    const std::filesystem::path resource_dir_path = RSC_PATH;
+    const std::filesystem::path file_path = resource_dir_path / "dev-factorization.txt";
     std::cout << "Working with " << file_path.string() << "\n";
     std::cout << std::endl;
 
@@ -206,11 +207,15 @@ int main() {
     std::cout << '\n';
     std::cout << "Factoring...\n";
     std::cout << "------------\n";
-    constexpr int number_of_steps = 70;
+    constexpr int number_of_steps = 1'000;
+    std::chrono::duration<double, std::milli> factoring_duration{};
     for (int steps = 1; steps <= number_of_steps; steps++) {
         BigUint number = factor_table.rbegin()->first;
         number.me_plus_one();
+        const auto start = std::chrono::high_resolution_clock::now();
         const auto factors = factorize(number, factor_table, prime_numbers);
+        auto end = std::chrono::high_resolution_clock::now();
+        factoring_duration += (end - start);
         factor_table.emplace_hint(factor_table.end(), number, factors);
         if (factors.empty()) {
             prime_numbers.push_back(number);
@@ -219,6 +224,8 @@ int main() {
         print_number_and_its_factors(number, factors);
         std::cout << '\n';
     }
+
+    std::cout << '\n' << number_of_steps << " numbers has been factorized in " << factoring_duration.count() << " ms\n";
 
     return 0;
 }
