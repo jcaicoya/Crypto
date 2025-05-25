@@ -324,22 +324,72 @@ TEST(BigUintTest, big_square) {
     EXPECT_EQ(a, expected_result);
 }
 
+TEST(BigUintTest, pow_by_zero) {
+    constexpr BigUint::Digit zero = 0;
+
+    BigUint base = BigUint::ZERO;
+    BigUint result;
+    EXPECT_THROW(result = base.pow_by(zero), std::runtime_error);
+
+    base = BigUint::ONE;
+    result = base.pow_by(zero);
+    EXPECT_EQ(result, BigUint::ONE);
+
+    base = BigUint::from_base10_string("5000000000");
+    result = base.pow_by(zero);
+    EXPECT_EQ(result, BigUint::ONE);
+}
+
+TEST(BigUintTest, pow_by_one) {
+    constexpr BigUint::Digit one = 1;
+
+    BigUint base = BigUint::ZERO;
+    BigUint result = base.pow_by(one);
+    EXPECT_EQ(result, BigUint::ONE);
+
+    base = BigUint::ONE;
+    result = base.pow_by(one);
+    EXPECT_EQ(result, BigUint::ONE);
+
+    base = BigUint::from_base10_string("5000000000");
+    result = base.pow_by(one);
+    EXPECT_EQ(result, base);
+}
+
+TEST(BigUintTest, powers_of_two) {
+    const BigUint base = BigUint::TWO;
+    BigUint result = base.pow_by(16);
+    EXPECT_EQ(result, BigUint::from_base10_string("65536"));
+
+    result = base.pow_by(17);
+    EXPECT_EQ(result, BigUint::from_base10_string("131072"));
+}
+
+TEST(BigUintTest, powers_of_ten) {
+    const BigUint base = BigUint::TEN;
+    BigUint result = base.pow_by(16);
+    EXPECT_EQ(result, BigUint::from_base10_string("10000000000000000"));
+
+    result = base.pow_by(19);
+    EXPECT_EQ(result, BigUint::from_base10_string("10000000000000000000"));
+}
+
 TEST(BigUintTest, divide_by_one) {
-    const BigUint dividend("1|4464"); // Decimal 70'000
+    const BigUint dividend = BigUint::from_base10_string("70000");
     auto [quotient, remainder] = dividend.divide_by(BigUint::ONE);
     EXPECT_EQ(quotient, dividend);
     EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
 TEST(BigUintTest, divide_by_itself) {
-    const BigUint dividend("1|4464"); // Decimal 70'000
+    const BigUint dividend = BigUint::from_base10_string("70000");
     auto [quotient, remainder] = dividend.divide_by(dividend);
     EXPECT_EQ(quotient, BigUint::ONE);
     EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
 TEST(BigUintTest, divide_by_itself_plus_one) {
-    const BigUint dividend("1|4464"); // Decimal 70'000
+    const BigUint dividend = BigUint::from_base10_string("70000");
     const BigUint divisor = dividend.plus_one();
     const auto [quotient, remainder] = dividend.divide_by(divisor);
     EXPECT_EQ(quotient, BigUint::ZERO);
@@ -347,21 +397,21 @@ TEST(BigUintTest, divide_by_itself_plus_one) {
 }
 
 TEST(BigUintTest, divide_by_two) {
-    const BigUint dividend("1|4464"); // Decimal 70'000
+    const BigUint dividend = BigUint::from_base10_string("70000");
     const auto [quotient, remainder] = dividend.divide_by(BigUint::TWO);
     EXPECT_EQ(quotient, BigUint(35'000));
     EXPECT_EQ(remainder, BigUint::ZERO);
 }
 
 TEST(BigUintTest, divide_by_three) {
-    const BigUint dividend("1|4464"); // Decimal 70'000
+    const BigUint dividend = BigUint::from_base10_string("70000");
     auto [quotient, remainder] = dividend.divide_by(BigUint(3));
     EXPECT_EQ(quotient, BigUint{23'333});
     EXPECT_EQ(remainder, BigUint::ONE);
 }
 
 TEST(BigUintTest, divide_by_ten) {
-    const BigUint dividend("1|4464"); // Decimal 70'000
+    const BigUint dividend = BigUint::from_base10_string("70000");
     auto [quotient, remainder] = dividend.divide_by(BigUint(10));
     EXPECT_EQ(quotient, BigUint{7'000});
     EXPECT_EQ(remainder, BigUint::ZERO);

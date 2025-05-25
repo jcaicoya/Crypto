@@ -177,9 +177,13 @@ void write_number_and_factors_at_the_end_of_file(const BigUint &number, const st
     out.close();
 }
 
+constexpr bool show_factor_table = false;
+constexpr bool show_prime_numbers = true;
+constexpr bool factor_more_numbers = false;
+
 int main() {
     const std::filesystem::path resource_dir_path = RSC_PATH;
-    const std::filesystem::path file_path = resource_dir_path / "dev-factorization.txt";
+    const std::filesystem::path file_path = !resource_dir_path.empty() ? resource_dir_path / "dev-factorization.txt" : "resources/factorization.txt";
     std::cout << "Working with " << file_path.string() << "\n";
     std::cout << std::endl;
 
@@ -190,42 +194,52 @@ int main() {
         std::cout << e.what() << '\n';
     }
 
-    std::cout << '\n';
-    std::cout << "Factorization table:\n";
-    std::cout << "--------------------\n";
-    summarize_factor_table(factor_table);
+    if constexpr  (show_factor_table) {
+        std::cout << '\n';
+        std::cout << "Factorization table:\n";
+        std::cout << "--------------------\n";
+        summarize_factor_table(factor_table);
+    }
 
     PrimeNumbers prime_numbers;
     load_primes_from_table(factor_table, prime_numbers);
-    std::cout << '\n';
-    std::cout << "Prime numbers:\n";
-    std::cout << "--------------\n";
-    for (auto &prime_number : prime_numbers) {
-        std::cout << prime_number << '\n';
-    }
 
-    std::cout << '\n';
-    std::cout << "Factoring...\n";
-    std::cout << "------------\n";
-    constexpr int number_of_steps = 1'000;
-    std::chrono::duration<double, std::milli> factoring_duration{};
-    for (int steps = 1; steps <= number_of_steps; steps++) {
-        BigUint number = factor_table.rbegin()->first;
-        number.me_plus_one();
-        const auto start = std::chrono::high_resolution_clock::now();
-        const auto factors = factorize(number, factor_table, prime_numbers);
-        auto end = std::chrono::high_resolution_clock::now();
-        factoring_duration += (end - start);
-        factor_table.emplace_hint(factor_table.end(), number, factors);
-        if (factors.empty()) {
-            prime_numbers.push_back(number);
-        }
-        write_number_and_factors_at_the_end_of_file(number, factors, file_path);
-        print_number_and_its_factors(number, factors);
+    if constexpr (show_prime_numbers) {
         std::cout << '\n';
+        const auto prime_numbers_size = prime_numbers.size();
+        std::cout << "First " << prime_numbers_size << " prime numbers:\n";
+        const std::string underlined(std::to_string(prime_numbers_size).size(), '-');
+        std::cout << underlined << "--------------------\n";
+        for (auto &prime_number : prime_numbers) {
+            std::cout << prime_number << '\n';
+        }
+        std::cout << "There are " << prime_numbers_size << " primes between " << factor_table.begin()->first << " and " << factor_table.rbegin()->first << "\n";
     }
 
-    std::cout << '\n' << number_of_steps << " numbers has been factorized in " << factoring_duration.count() << " ms\n";
+    if constexpr (factor_more_numbers) {
+        std::cout << '\n';
+        std::cout << "Factoring...\n";
+        std::cout << "------------\n";
+        constexpr int number_of_steps = 100'000;
+        std::chrono::duration<double, std::milli> factoring_duration{};
+        for (int steps = 1; steps <= number_of_steps; steps++) {
+            BigUint number = factor_table.rbegin()->first;
+            number.me_plus_one();
+            const auto start = std::chrono::high_resolution_clock::now();
+            const auto factors = factorize(number, factor_table, prime_numbers);
+            auto end = std::chrono::high_resolution_clock::now();
+            factoring_duration += (end - start);
+            factor_table.emplace_hint(factor_table.end(), number, factors);
+            if (factors.empty()) {
+                prime_numbers.push_back(number);
+            }
+            write_number_and_factors_at_the_end_of_file(number, factors, file_path);
+            print_number_and_its_factors(number, factors);
+            std::cout << '\n';
+        }
+
+        std::cout << '\n' << number_of_steps << " numbers has been factorized in " << factoring_duration.count() << " ms\n";
+    }
 
     return 0;
 }

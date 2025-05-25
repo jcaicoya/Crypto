@@ -40,6 +40,9 @@ public:
     [[nodiscard]] Digit get_least_significant_digit() const { return digits_.front(); }
     [[nodiscard]] Digit get_most_significant_digit() const { return digits_.back(); }
 
+    [[nodiscard]] bool is_even() const { return (digits_.front() & 1) == 0; };
+    [[nodiscard]] bool is_odd() const { return not is_even(); }
+
     void set_zero() { *this = BigUint::ZERO; }
     void set_one() { *this = BigUint::ONE; }
     void set_digits(const Digits &digits);
@@ -95,6 +98,9 @@ public:
 
     void square_me();
     [[nodiscard]] BigUint square() const;
+
+    void pow_me_by(DigitType digit);
+    [[nodiscard]] BigUint pow_by(DigitType digit) const;
 
     // returns the remainder
     BigUint::DigitType divide_me_by(DigitType digit);

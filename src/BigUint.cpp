@@ -581,6 +581,37 @@ void BigUint::square_me() {
     return result;
 }
 
+void BigUint::pow_me_by(DigitType digit) {
+    *this = pow_by(digit);
+}
+
+[[nodiscard]] BigUint BigUint::pow_by(DigitType power) const {
+    if (*this == BigUint::ZERO) {
+        if (power == 0) {
+            throw std::runtime_error("zero pow by zero");
+        }
+
+        return BigUint::ONE;
+    }
+
+    if (*this == BigUint::ONE) {
+        return BigUint::ONE;
+    }
+
+    BigUint u = BigUint::ONE;
+    BigUint v = BigUint::ONE;
+    BigUint z = *this;
+    while (power > 0) {
+        if (not ((power & 1) == 0)) {
+            u = u * z;
+        }
+        power /= 2;
+        v *= 2;
+        z.square_me();
+    }
+    return u;
+}
+
 // returns the remainder
 BigUint::DigitType BigUint::divide_me_by(const DigitType divisor) {
     if (divisor == 0) {
