@@ -581,8 +581,8 @@ void BigUint::square_me() {
     return result;
 }
 
-void BigUint::pow_me_by(DigitType digit) {
-    *this = pow_by(digit);
+void BigUint::pow_me_by(DigitType power) {
+    *this = pow_by(power);
 }
 
 [[nodiscard]] BigUint BigUint::pow_by(DigitType power) const {
@@ -607,6 +607,42 @@ void BigUint::pow_me_by(DigitType digit) {
         }
         power /= 2;
         v *= 2;
+        z.square_me();
+    }
+    return u;
+}
+
+void BigUint::pow_me_by(const BigUint &power) {
+    *this = pow_by(power);
+}
+
+[[nodiscard]] BigUint BigUint::pow_by(const BigUint &power) const {
+    if (power.digits_.size() == 1) {
+        return pow_by(power.digits_.front());
+    }
+
+    if (*this == BigUint::ZERO) {
+        if (power == 0) {
+            throw std::runtime_error("zero pow by zero");
+        }
+
+        return BigUint::ONE;
+    }
+
+    if (*this == BigUint::ONE) {
+        return BigUint::ONE;
+    }
+
+    BigUint u = BigUint::ONE;
+    BigUint v = BigUint::ONE;
+    BigUint z = *this;
+    BigUint n = power;
+    while (n > 0) {
+        if (n.is_odd()) {
+            u = u * z;
+        }
+        n /= BigUint::TWO;
+        v *= BigUint::TWO;
         z.square_me();
     }
     return u;

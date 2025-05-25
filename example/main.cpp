@@ -6,6 +6,19 @@ std::ostream & print(const BigUint& a, std::ostream &out = std::cout) {
     return out;
 }
 
+std::ostream & partial_print(const std::string& str, std::size_t displayed_digits, std::ostream &out = std::cout) {
+    const auto number_digits = str.length();
+    if (number_digits <= 2 * displayed_digits) {
+        out << str;
+        return out;
+    }
+
+    const auto first_part = str.substr(0, displayed_digits);
+    const auto last_part = str.substr(number_digits - displayed_digits);
+    out << first_part << "..." << last_part;
+    return out;
+}
+
 int main() {
     // Addition, substraction and from/to base 10.
     {
@@ -51,6 +64,30 @@ int main() {
         std::cout << "(a * b) mod(n) is: "; print(result) << '\n';
     }
 
+    // Powers of two
+    std::cout << "\nPowers of two:\n";
+    constexpr uint16_t power = 65'534;
+    constexpr std::size_t displayed_digits = 10;
+
+    auto result = BigUint::TWO.pow_by(power).to_base10_string();
+    std::cout << 2 << "^" << power << " has " << result.length() << " digits: ";
+    partial_print(result, displayed_digits) << '\n';
+
+    const BigUint base_as_power = BigUint::from_base10_string("65535");
+    result = BigUint::TWO.pow_by(base_as_power).to_base10_string();
+    std::cout << 2 << "^" << base_as_power.to_base10_string() << " has " << result.length() << " digits: ";
+    partial_print(result, displayed_digits) << '\n';
+
+    // Powers of three
+    std::cout << "\nPowers of three:\n";
+    const BigUint number_3{3};
+    result = number_3.pow_by(power).to_base10_string();
+    std::cout << 3 << "^" << power << " has " << result.length() << " digits: ";
+    partial_print(result, displayed_digits) << '\n';
+
+    result = number_3.pow_by(base_as_power).to_base10_string();
+    std::cout << 3 << "^" << base_as_power.to_base10_string() << " has " << result.length() << " digits: ";
+    partial_print(result, displayed_digits) << '\n';
     return 0;
 }
 

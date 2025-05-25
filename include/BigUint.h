@@ -99,8 +99,10 @@ public:
     void square_me();
     [[nodiscard]] BigUint square() const;
 
-    void pow_me_by(DigitType digit);
-    [[nodiscard]] BigUint pow_by(DigitType digit) const;
+    void pow_me_by(DigitType power);
+    [[nodiscard]] BigUint pow_by(DigitType power) const;
+    void pow_me_by(const BigUint &power);
+    [[nodiscard]] BigUint pow_by(const BigUint &power) const;
 
     // returns the remainder
     BigUint::DigitType divide_me_by(DigitType digit);
