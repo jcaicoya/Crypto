@@ -868,6 +868,20 @@ BigUint BigUint::modPow(const BigUint& exponent, const BigUint& mod) const {
 }
 */
 
+BigUint BigUint::gcd(BigUint a, BigUint b) {
+    while (b != BigUint::ZERO) {
+        BigUint r = a % b;
+        a = b;
+        b = std::move(r);
+    }
+
+    return a;
+}
+
+BigUint BigUint::lcm(const BigUint &a, const BigUint &b) {
+    return a * b / gcd(a, b);
+}
+
 void BigUint::remove_leading_zeros() {
     while (digits_.size() > 1 && digits_.back() == 0) {
         digits_.pop_back();

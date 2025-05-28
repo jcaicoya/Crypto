@@ -485,6 +485,40 @@ TEST(BigUintTest, ModularExponentiation) {
 }
 */
 
+TEST(BigUintTest, gcd) {
+    BigUint a(4096);
+    BigUint b(144);
+    BigUint g = BigUint::gcd(a, b);
+    EXPECT_EQ(g.as_digit(), 16);
+
+    a = BigUint::from_base10_string("12345678901234567890");
+    b = BigUint::from_base10_string("11223344556677889900");
+    g = BigUint::gcd(a, b);
+    EXPECT_EQ(g.as_digit(), 30);
+
+    a = BigUint::from_base10_string("4294967296");
+    b = BigUint::from_base10_string("1853020188851841");
+    g = BigUint::gcd(a, b);
+    EXPECT_EQ(g, BigUint::ONE);
+}
+
+TEST(BigUintTest, lcm) {
+    BigUint a(4096);
+    BigUint b(144);
+    BigUint l = BigUint::lcm(a, b);
+    EXPECT_EQ(l.as_digit(), 36864);
+
+    a = BigUint::from_base10_string("12345678901234567890");
+    b = BigUint::from_base10_string("11223344556677889900");
+    l = BigUint::lcm(a, b);
+    EXPECT_EQ(l, BigUint::from_base10_string("4618660269822135341434463931449843700"));
+
+    a = BigUint::from_base10_string("4294967296");
+    b = BigUint::from_base10_string("1853020188851841");
+    l = BigUint::lcm(a, b);
+    EXPECT_EQ(l, BigUint::from_base10_string("7958661109946400884391936"));
+}
+
 TEST(BigUintTest, NaiveMultiplication) {
     const BigUint a = BigUint::from_base10_string("123456789");
     const BigUint b = BigUint::from_base10_string("987654321");

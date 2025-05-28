@@ -140,6 +140,9 @@ public:
     [[nodiscard]] BigUint modPow(const BigUint& other, const BigUint& mod) const;
     */
 
+    static BigUint gcd(BigUint a, BigUint b);
+    static BigUint lcm(const BigUint &a, const BigUint &b);
+
     friend class BigUintTestAccessor;
     friend class BigUintBenchmarkAccessor;
 
